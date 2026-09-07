@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  /* Keep Next.js server output for Supabase SSR/auth routes. */
 };
 
 export default nextConfig;

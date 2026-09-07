@@ -9,6 +9,7 @@ Version 0.1.0. Foundation đã được khởi tạo bằng Next.js App Router +
 - Middleware bảo vệ `/app/*` khi Supabase env có mặt.
 - Manifest, icon, service worker shell và error/loading boundaries đã có.
 - Migration nền tảng có schema, RLS, seed, indexes, Storage policies và atomic RPC create/recalculate.
+- Site đã được đăng ký để chuẩn bị hosting, nhưng chưa deploy vì chưa có adapter Next server → Cloudflare Worker phù hợp với SSR/auth.
 
 ## Recently completed
 2026-09-07: Phase 0–1 foundation, docs system, shared UI primitives, finance schemas/calculations.

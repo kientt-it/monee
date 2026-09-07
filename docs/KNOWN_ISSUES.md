@@ -5,3 +5,4 @@
 - Service worker mới cache shell, chưa có offline write queue.
 - Route UI cho các feature phụ và E2E chưa hoàn thiện.
 - Chưa có kiểm thử runner trong package scripts; cần thêm ở phase Transactions.
+- Site publishing chưa thực hiện: Next.js server output cần được đóng gói bằng runtime tương thích Cloudflare trước khi phát hành production.
