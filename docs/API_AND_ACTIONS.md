@@ -6,4 +6,6 @@
 
 `recalculate_account_balance(account_id)` — authenticated owner; tính lại initial balance + effects từ non-deleted transactions.
 
-Server Actions cho CRUD sẽ validate bằng Zod, gọi service/domain layer, map lỗi RPC, rồi revalidate route. Chưa expose actions UI ở foundation.
+Server Actions cho CRUD sẽ validate bằng Zod, gọi service/domain layer, map lỗi RPC, rồi revalidate route.
+
+`createAccountAction(input)` — authenticated; validate tên, loại, tiền BIGINT và currency bằng `accountSchema`; insert account với initial/current balance; revalidate `/app/accounts` và `/app`. Khi thiếu env Supabase trả trạng thái cấu hình thay vì báo lưu thành công.

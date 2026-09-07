@@ -4,7 +4,7 @@
 `src/app` chứa route và boundary; `src/features` chứa domain theo feature; `src/components` chứa UI/layout dùng chung; `src/lib/domain` chứa tính toán; `supabase/migrations` là source of truth schema; `docs` ghi lại quyết định.
 
 ## Data flow
-Server Components fetch initial data qua Supabase SSR client. Client Components chỉ xử lý form, sheet, chart, filter và optimistic UI an toàn. Mutation đi qua Server Action/service trong các phase tiếp theo, gọi PostgreSQL RPC cho balance.
+Server Components fetch initial data qua Supabase SSR client. Client Components chỉ xử lý form, sheet, chart, filter và optimistic UI an toàn. Accounts create hiện đi qua Server Action với Zod + auth check; mutation giao dịch sẽ gọi PostgreSQL RPC cho balance.
 
 ## Supabase
 Browser dùng anon key với RLS. Server dùng `@supabase/ssr` cookie strategy. Service role chỉ dành cho server-side job được kiểm soát, không nằm trong browser bundle.
