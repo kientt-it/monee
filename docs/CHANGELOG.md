@@ -1,6 +1,6 @@
 # Changelog
 
-## 2026-09-07
+## 2026-09-07 · 0.2.0
 
 ### Added
 - Khởi tạo Next.js App Router + TypeScript strict + Tailwind.
@@ -9,3 +9,4 @@
 - Migration PostgreSQL đầu tiên với tables, RLS, indexes, seed categories, storage policies và atomic transaction RPC.
 - Bộ tài liệu dự án và domain schemas/calculations.
 - Trang Accounts với tổng số dư, dữ liệu mẫu có nhãn và form tạo account qua server action.
+- Trang Transactions, form Expense/Income/Transfer và create action qua atomic RPC.

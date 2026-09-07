@@ -1,7 +1,7 @@
 # AI handoff
 
 ## Current project state
-Version 0.1.0. Foundation đã được khởi tạo bằng Next.js App Router + TypeScript strict + Tailwind, với dashboard preview mobile-first.
+Version 0.2.0. Foundation và hai luồng Accounts/Transactions create đã được khởi tạo bằng Next.js App Router + TypeScript strict + Tailwind, với dashboard preview mobile-first.
 
 ## Working
 - Root `/` hiển thị dashboard mẫu responsive.
@@ -11,6 +11,7 @@ Version 0.1.0. Foundation đã được khởi tạo bằng Next.js App Router +
 - Migration nền tảng có schema, RLS, seed, indexes, Storage policies và atomic RPC create/recalculate.
 - Site đã được đăng ký để chuẩn bị hosting, nhưng chưa deploy vì chưa có adapter Next server → Cloudflare Worker phù hợp với SSR/auth.
 - `/app/accounts` đã có danh sách account và create flow với React Hook Form + Zod; không có Supabase env thì chỉ hiển thị demo và chặn lưu thật.
+- `/app/transactions` và `/app/transactions/new` đã có list/form; create action gọi `create_financial_transaction` với idempotency key, còn edit/delete chưa triển khai.
 
 ## Recently completed
 2026-09-07: Phase 0–1 foundation và Accounts foundation, docs system, shared UI primitives, finance schemas/calculations.
@@ -18,7 +19,7 @@ Version 0.1.0. Foundation đã được khởi tạo bằng Next.js App Router +
 ## Next priorities
 1. Kết nối Supabase project/env và apply migration.
 2. Onboarding + profile + hoàn thiện accounts CRUD (edit/archive).
-3. Transaction form dùng RHF/Zod gọi RPC, rồi edit/delete atomic.
+3. Transaction edit/delete atomic, sau đó thêm tests tài chính.
 4. Thêm unit/integration tests và chuyển dashboard từ sample sang server data.
 
 ## Rules to preserve
