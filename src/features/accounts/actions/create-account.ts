@@ -11,7 +11,7 @@ export async function createAccountAction(input: unknown) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { ok: false as const, error: "Bạn cần đăng nhập để thêm tài khoản." };
-  const { error } = await supabase.from("accounts").insert({ user_id: user.id, name: parsed.data.name, type: parsed.data.type, initial_balance: parsed.data.initialBalance, current_balance: parsed.data.initialBalance, currency: parsed.data.currency, icon: parsed.data.icon ?? null, color: parsed.data.color ?? null, include_in_total: parsed.data.includeInTotal });
+  const { error } = await supabase.rpc("create_financial_account", { p_name: parsed.data.name, p_type: parsed.data.type, p_initial_balance: parsed.data.initialBalance, p_currency: parsed.data.currency, p_icon: parsed.data.icon ?? null, p_color: parsed.data.color ?? null, p_include_in_total: parsed.data.includeInTotal });
   if (error) return { ok: false as const, error: "Không thể tạo tài khoản lúc này." };
   revalidatePath("/app/accounts");
   revalidatePath("/app");

@@ -14,3 +14,12 @@ export function calculateSavingRate(transactions: FinancialTransaction[]) {
 export function calculateTotalBalance(accounts: Array<{ currentBalance: number; isArchived: boolean; includeInTotal: boolean }>) {
   return accounts.filter((account) => !account.isArchived && account.includeInTotal).reduce((total, account) => total + account.currentBalance, 0);
 }
+
+export type BudgetStatus = "normal" | "warning" | "strong_warning" | "over";
+
+export function calculateBudgetUsage(spent: number, budget: number) {
+  if (!Number.isSafeInteger(spent) || spent < 0 || !Number.isSafeInteger(budget) || budget <= 0) throw new Error("INVALID_BUDGET");
+  const percentage = (spent / budget) * 100;
+  const status: BudgetStatus = percentage >= 100 ? "over" : percentage >= 90 ? "strong_warning" : percentage >= 75 ? "warning" : "normal";
+  return { spent, budget, remaining: Math.max(budget - spent, 0), percentage, status };
+}
