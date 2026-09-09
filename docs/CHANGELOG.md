@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-09-09 · 0.16.0
+
+### Added
+- Thêm mục “Khác” trên thanh điều hướng mobile, mở nhanh Tài khoản, Ngân sách, Mục tiêu, Định kỳ, Thông báo và Cá nhân.
+- Menu mobile có thể đóng bằng nút đóng, chạm ra ngoài hoặc phím Escape.
+
 ## 2026-09-09 · 0.15.0
 
 ### Performance
