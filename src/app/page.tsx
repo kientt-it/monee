@@ -1,5 +1,10 @@
-import { DashboardView } from "@/features/dashboard/components/dashboard-view";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { getSupabaseConfig } from "@/lib/supabase/env";
 
-export default function Home() {
-  return <DashboardView preview />;
+export default async function Home() {
+  if (!getSupabaseConfig().configured) redirect("/login");
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  redirect(user ? "/app" : "/login");
 }

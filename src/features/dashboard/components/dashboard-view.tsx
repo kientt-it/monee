@@ -17,31 +17,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { DashboardSummary } from "@/features/dashboard/types";
 import { formatCompactCurrency, formatCurrency } from "@/lib/utils";
 
-const sampleDashboard: DashboardSummary = {
-  greetingName: "Kien",
-  dateLabel: "Thứ Hai, 07 tháng 9",
-  monthLabel: "Tháng 9",
-  currency: "VND",
-  totalBalance: 35_850_000,
-  monthlyIncome: 18_000_000,
-  monthlyExpense: 3_320_000,
-  netCashFlow: 14_680_000,
-  savingRate: 81.6,
-  budget: { amount: 5_000_000, spent: 3_320_000, remaining: 1_680_000, percentage: 66.4, status: "normal" },
-  spending: [
-    { label: "Ăn uống", amount: 2_180_000, percentage: 65.7, color: "#087f5b" },
-    { label: "Di chuyển", amount: 820_000, percentage: 24.7, color: "#efaa47" },
-    { label: "Mua sắm", amount: 320_000, percentage: 9.6, color: "#8795c4" },
-  ],
-  recentTransactions: [
-    { id: "sample-1", title: "Highlands Coffee", metadata: "Ăn uống · Hôm nay, 09:42", amount: 65_000, type: "expense" },
-    { id: "sample-2", title: "Lương tháng 9", metadata: "Thu nhập · Hôm qua, 08:00", amount: 18_000_000, type: "income" },
-    { id: "sample-3", title: "Siêu thị WinMart", metadata: "Mua sắm · 05/09/2026", amount: 485_000, type: "expense" },
-  ],
-  goals: [{ id: "sample-goal", name: "Du lịch Đà Nẵng", currentAmount: 8_400_000, targetAmount: 20_000_000, percentage: 42, color: "#8795c4", icon: "🏖️" }],
-  unreadNotifications: 2,
-};
-
 function Money({ amount, currency }: { amount: number; currency: string }) {
   return <span className="tabular-nums">{formatCurrency(Math.abs(amount), currency)}</span>;
 }
@@ -64,9 +39,9 @@ function budgetBarColor(status: NonNullable<DashboardSummary["budget"]>["status"
   return "var(--brand)";
 }
 
-export function DashboardView({ preview = false, data }: { preview?: boolean; data?: DashboardSummary }) {
-  const dashboard = data ?? sampleDashboard;
-  const href = (path: string) => (preview ? "#" : path);
+export function DashboardView({ data }: { data: DashboardSummary }) {
+  const dashboard = data;
+  const href = (path: string) => path;
   const savingRate = new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 1 }).format(dashboard.savingRate);
   const firstGoal = dashboard.goals[0];
 
@@ -192,7 +167,7 @@ export function DashboardView({ preview = false, data }: { preview?: boolean; da
                   const Icon = item.type === "income" ? ArrowDownLeft : item.type === "expense" ? ArrowUpRight : Repeat2;
                   const sign = item.type === "income" ? "+" : item.type === "expense" ? "−" : "";
                   return (
-                    <Link key={item.id} href={preview ? "#" : `/app/transactions/${item.id}`} className="flex items-center gap-3 rounded-xl py-3 hover:bg-[var(--surface-muted)]">
+                    <Link key={item.id} href={`/app/transactions/${item.id}`} className="flex items-center gap-3 rounded-xl py-3 hover:bg-[var(--surface-muted)]">
                       <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${item.type === "income" ? "bg-[var(--brand-soft)] text-[var(--brand)]" : item.type === "expense" ? "bg-[#fff1dc] text-[#c88029]" : "bg-[#e8edff] text-[#6474a8]"}`}><Icon size={19} /></div>
                       <div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold">{item.title}</p><p className="mt-0.5 truncate text-xs text-[var(--muted)]">{item.metadata}</p></div>
                       <p className={`text-sm font-bold tabular-nums ${item.type === "income" ? "text-[var(--brand)]" : item.type === "transfer" ? "text-[var(--muted)]" : "text-[var(--foreground)]"}`}>{sign}<Money amount={item.amount} currency={dashboard.currency} /></p>
@@ -206,8 +181,7 @@ export function DashboardView({ preview = false, data }: { preview?: boolean; da
           </div>
         </main>
       </div>
-      <BottomNav preview={preview} />
-      {preview && <div className="fixed bottom-20 left-1/2 z-10 -translate-x-1/2 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-xs font-medium text-[var(--muted)] shadow-md md:bottom-5">Bản xem trước · dữ liệu mẫu</div>}
+      <BottomNav />
     </div>
   );
 }

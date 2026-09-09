@@ -93,8 +93,8 @@ function formatTransactionDate(value: string) {
   }).format(new Date(value));
 }
 
-export async function getDashboardSummary(): Promise<DashboardSummary | null> {
-  if (!getSupabaseConfig().configured) return null;
+export async function getDashboardSummary(): Promise<DashboardSummary> {
+  if (!getSupabaseConfig().configured) redirect("/login");
 
   const supabase = await createClient();
   const {

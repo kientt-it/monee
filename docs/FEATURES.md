@@ -2,7 +2,7 @@
 
 | Feature | Status | Notes |
 |---|---|---|
-| Mobile dashboard | Implemented | `/app` đọc dữ liệu Supabase thật; `/` giữ preview có nhãn dữ liệu mẫu |
+| Mobile dashboard | Implemented | `/app` đọc dữ liệu Supabase thật; `/` điều hướng vào luồng Auth, không còn dữ liệu mẫu |
 | Auth + onboarding | Implemented core | Login/register/recovery, route protection, onboarding, profile, theme và sign-out; cần E2E |
 | Accounts | Implemented MVP core | Create/edit/archive/restore, include-in-total, lịch sử giữ account archived; delete vĩnh viễn không hỗ trợ |
 | Transactions | Implemented MVP core | List/detail/create/edit/soft-delete/undo; atomic RPC; server-side type/month filters; pagination; 9 domain tests; receipt planned |

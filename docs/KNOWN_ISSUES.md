@@ -1,6 +1,6 @@
 # Known issues
 
-- Root `/` cố ý giữ dữ liệu mẫu để preview; dashboard thật nằm tại `/app` sau đăng nhập.
+- Root `/` yêu cầu Supabase env để hoàn tất điều hướng Auth; dashboard thật nằm tại `/app` sau đăng nhập.
 - Service worker mới cache shell, chưa có offline write queue.
 - Route UI cho một số feature phụ và E2E chưa hoàn thiện.
 - Budget progress hiện tập trung vào kỳ hiện tại; chưa có notification job tự động khi chạm `alert_threshold`.

@@ -4,8 +4,15 @@ import { getSupabaseConfig } from "@/lib/supabase/env";
 
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
+  const pathname = request.nextUrl.pathname;
+  const isProtected = pathname.startsWith("/app");
+  const isOnboarding = pathname === "/app/onboarding";
+  const isAuth = ["/login", "/register", "/forgot-password"].includes(pathname);
   const { url, key, configured } = getSupabaseConfig();
-  if (!configured || !url || !key) return response;
+  if (!configured || !url || !key) {
+    if (isProtected) return NextResponse.redirect(new URL("/login", request.url));
+    return response;
+  }
 
   const supabase = createServerClient(url, key, {
     cookies: {
@@ -20,11 +27,6 @@ export async function proxy(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  const pathname = request.nextUrl.pathname;
-  const isProtected = pathname.startsWith("/app");
-  const isOnboarding = pathname === "/app/onboarding";
-  const isAuth = ["/login", "/register", "/forgot-password"].includes(pathname);
-
   const redirectWithCookies = (path: string) => {
     const redirectResponse = NextResponse.redirect(new URL(path, request.url));
     response.cookies.getAll().forEach((cookie) => redirectResponse.cookies.set(cookie));

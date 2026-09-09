@@ -3,5 +3,5 @@ import { getDashboardSummary } from "@/features/dashboard/queries/get-dashboard-
 
 export default async function AppPage() {
   const data = await getDashboardSummary();
-  return <DashboardView data={data ?? undefined} preview={!data} />;
+  return <DashboardView data={data} />;
 }

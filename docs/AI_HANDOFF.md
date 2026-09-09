@@ -1,10 +1,10 @@
 # AI handoff
 
 ## Current project state
-Version 0.12.0. Foundation, onboarding/profile, Accounts, Transactions, Budgets, Reports, Saving Goals, Recurring và Notifications MVP core đã có bằng Next.js App Router + TypeScript strict + Tailwind. Supabase dev đã được kết nối; dashboard trong khu vực đăng nhập đọc dữ liệu thật.
+Version 0.13.0. Foundation, onboarding/profile, Accounts, Transactions, Budgets, Reports, Saving Goals, Recurring và Notifications MVP core đã có bằng Next.js App Router + TypeScript strict + Tailwind. Supabase dev đã được kết nối; dashboard trong khu vực đăng nhập đọc dữ liệu thật.
 
 ## Working
-- Root `/` hiển thị dashboard mẫu responsive; `/app` tổng hợp profile, account, giao dịch tháng, ngân sách, mục tiêu và thông báo từ Supabase.
+- Root `/` điều hướng theo phiên Supabase: chưa đăng nhập vào `/login`, đã đăng nhập vào `/app`; `/app` tổng hợp profile, account, giao dịch tháng, ngân sách, mục tiêu và thông báo từ Supabase.
 - `/login`, `/register`, `/forgot-password`, `/reset-password`, `/auth/callback` đã có luồng Supabase Auth.
 - Proxy bảo vệ `/app/*`, đưa user chưa hoàn tất hồ sơ đến `/app/onboarding` và bỏ qua onboarding cho user cũ.
 - `/app/settings/profile` cho phép sửa tên, giao diện sáng/tối/theo thiết bị và đăng xuất. Preference được lưu trong profile và đồng bộ khi vào app.

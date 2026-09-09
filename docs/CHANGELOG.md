@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-09-09 · 0.13.0
+
+### Changed
+- Root `/` không còn hiển thị dữ liệu mẫu; người chưa đăng nhập được đưa vào `/login`, người đã đăng nhập vào `/app`.
+- Dashboard protected chỉ nhận dữ liệu Supabase thật và không fallback sang sample dashboard.
+- Khi Supabase chưa cấu hình, các route `/app/*` không hiển thị dữ liệu mẫu mà chuyển về `/login`.
+
 ## 2026-09-09 · 0.12.1
 
 ### Fixed
