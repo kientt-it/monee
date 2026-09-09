@@ -18,7 +18,7 @@ Version 0.12.0. Foundation, onboarding/profile, Accounts, Transactions, Budgets,
 - `/app/reports` có báo cáo tuần/tháng/năm/tùy chỉnh; hiển thị thu nhập, chi tiêu, dòng tiền ròng, tỷ lệ tiết kiệm, nhóm chi tiêu và biểu đồ xu hướng. Dữ liệu chỉ lấy transaction expense/income chưa xóa mềm.
 - `/app/goals` có create/edit, mục tiêu theo target date/account, progress, tạm dừng/tiếp tục và thêm contribution. Contribution gọi RPC atomic để cập nhật lịch sử và cached `current_amount` cùng lúc.
 - `/app/recurring` có create/edit, expense/income/transfer, tần suất, ngày chạy kế tiếp và bật/tắt lịch. `/app/notifications` hiển thị 50 thông báo gần nhất và đánh dấu đã đọc từng mục hoặc tất cả.
-- Edge Function `supabase/functions/recurring-scheduler` gọi RPC service-role để xử lý due records, tạo transaction atomic, execution log và notification.
+- Edge Function `supabase/functions/recurring-scheduler` gọi RPC service-role để xử lý due records, tạo transaction atomic, execution log và notification. Secret tùy chỉnh dùng tên `MONEE_SERVICE_ROLE_KEY` vì Supabase dành riêng namespace `SUPABASE_`.
 - Cấu hình chấp nhận cả `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` mới và tên cũ `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
 
 ## Recently completed

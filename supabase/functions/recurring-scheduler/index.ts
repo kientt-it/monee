@@ -3,7 +3,8 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL");
-const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+// Supabase reserves the SUPABASE_ namespace for built-in variables.
+const serviceRoleKey = Deno.env.get("MONEE_SERVICE_ROLE_KEY");
 const schedulerSecret = Deno.env.get("SCHEDULER_SECRET");
 
 Deno.serve(async (request) => {

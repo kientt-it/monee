@@ -19,4 +19,4 @@ Thêm migration `202609091300_recurring_scheduler.sql`. Migration tạo helper t
 27 unit/schema tests pass; lint và Next production build pass. Edge Function cần integration test trên Supabase thật.
 
 ## Follow-up
-Deploy Edge Function, đặt `SUPABASE_SERVICE_ROLE_KEY` và `SCHEDULER_SECRET`, cấu hình cron 5–15 phút/lần, rồi kiểm thử với test user.
+Deploy Edge Function, đặt `MONEE_SERVICE_ROLE_KEY` và `SCHEDULER_SECRET`, cấu hình cron 5–15 phút/lần, rồi kiểm thử với test user. Supabase không cho đặt custom secret bắt đầu bằng `SUPABASE_`, nên service-role key dùng tên riêng của Monee.

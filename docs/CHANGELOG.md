@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-09-09 · 0.12.1
+
+### Fixed
+- Đổi tên secret service-role của scheduler thành `MONEE_SERVICE_ROLE_KEY` để tương thích quy tắc Supabase không cho custom secret bắt đầu bằng `SUPABASE_`.
+
 ## 2026-09-09 · 0.12.0
 
 ### Added
