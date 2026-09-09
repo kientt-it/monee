@@ -25,5 +25,7 @@ Authenticated client chỉ được select transactions. Quyền insert/update/d
 
 Accounts edit/archive/restore dùng column grant metadata hiện có, không cần migration mới. Trước khi archive, Server Action kiểm tra không còn `recurring_transactions.is_active` tham chiếu account.
 
+Budgets MVP sử dụng trực tiếp bảng `budgets` và policy hiện có, không cần migration mới. Server Action chỉ cho phép category expense mặc định hoặc category thuộc user; tắt budget bằng `is_active = false` thay vì hard delete. Progress được tính từ transactions chưa xóa mềm ở request time.
+
 ## Indexes
 Transaction theo user/date, user/type, account, category và idempotency; account/budget/goal theo user; recurring theo user/next_run_date.

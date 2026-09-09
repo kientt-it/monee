@@ -6,7 +6,7 @@
 | Auth + onboarding | Implemented core | Login/register/recovery, route protection, onboarding, profile, theme và sign-out; cần E2E |
 | Accounts | Implemented MVP core | Create/edit/archive/restore, include-in-total, lịch sử giữ account archived; delete vĩnh viễn không hỗ trợ |
 | Transactions | Implemented MVP core | List/detail/create/edit/soft-delete; atomic RPC; 9 domain tests; filters/pagination/receipt planned |
-| Budgets | Foundation | Schema + Zod; CRUD/report planned |
+| Budgets | Implemented MVP core | `/app/budgets`: create/edit, category/all spending, weekly/monthly/yearly/custom periods, current-period progress, warning threshold, active/inactive history |
 | Reports | Planned | Domain formulas đã có |
 | Saving goals | Foundation | Schema + Zod; contribution UI planned |
 | Recurring | Foundation | Tables + idempotent execution log; scheduler planned |

@@ -8,6 +8,8 @@ Server Components fetch initial data qua Supabase SSR client. Dashboard dùng m�
 
 Account metadata edit/archive/restore đi qua Server Actions, auth check, Zod và RLS; không có action nào nhận hoặc ghi `current_balance`. Query transaction options giữ account archived để render lịch sử, còn form create lọc chúng ở view model.
 
+Budgets dùng Server Component query `/app/budgets` để đọc budget, category expense và giao dịch trong các cửa sổ hiện tại; view model tính spent/remaining/status bằng domain calculation. Create/edit/toggle đi qua Server Action với Zod, auth, kiểm tra category expense và RLS; dashboard dùng lại dữ liệu budget tháng cho summary.
+
 Next Proxy refresh session, bảo vệ route và enforce onboarding theo `profiles.onboarding_completed`. Profile được đọc qua request-scoped React cache; update đi qua Server Action với Zod và RLS. `next-themes` áp dụng preference đã lưu bằng `data-theme`.
 
 Financial domain có hàm thuần `applyTransactionEffect`, `replaceTransactionEffect`, `removeTransactionEffect` để dùng làm executable specification và unit test cho effect/reverse.

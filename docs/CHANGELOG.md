@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-09-09 · 0.7.0
+
+### Added
+- Trang `/app/budgets` với create/edit, ngân sách theo danh mục hoặc toàn bộ chi tiêu và các chu kỳ weekly/monthly/yearly/custom.
+- Tính tiến độ, số tiền còn lại, trạng thái cảnh báo và bật/tắt budget để giữ lịch sử.
+- 3 schema tests cho budget; tổng cộng 18 tests pass.
+
+### Changed
+- Dashboard link Ngân sách hiện trỏ tới màn hình quản lý thật.
+- Không thêm migration; dùng bảng `budgets`, RLS và categories hiện có.
+
 ## 2026-09-07 · 0.3.0
 
 ### Added
