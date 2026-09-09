@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-09-09 · 0.14.0
+
+### Added
+- Điều hướng chung cho toàn bộ khu vực `/app/*`: sidebar desktop và bottom navigation trên mobile.
+- Liên kết nhanh tới Tổng quan, Tài khoản, Giao dịch, Ngân sách, Mục tiêu, Báo cáo, Định kỳ, Thông báo và Cá nhân.
+
+### Changed
+- Sidebar tự đánh dấu đúng route hiện tại; Dashboard và Cá nhân không còn render thanh điều hướng trùng lặp.
+
 ## 2026-09-09 · 0.13.0
 
 ### Changed

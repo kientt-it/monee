@@ -7,12 +7,9 @@ import {
   Bell,
   ChevronRight,
   MoreHorizontal,
-  PiggyBank,
   Plus,
   Repeat2,
-  Sparkles,
 } from "lucide-react";
-import { BottomNav } from "@/components/layout/bottom-nav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { DashboardSummary } from "@/features/dashboard/types";
 import { formatCompactCurrency, formatCurrency } from "@/lib/utils";
@@ -46,29 +43,7 @@ export function DashboardView({ data }: { data: DashboardSummary }) {
   const firstGoal = dashboard.goals[0];
 
   return (
-    <div className="app-shell bg-[var(--background)]">
-      <div className="desktop-grid mx-auto grid max-w-[1440px]">
-        <aside className="hidden min-h-screen border-r border-[var(--border)] bg-[var(--surface)] p-7 md:block">
-          <div className="mb-12 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-[14px] bg-[var(--brand)] text-white"><PiggyBank size={21} /></div>
-            <span className="text-xl font-bold tracking-tight">monee</span>
-          </div>
-          <p className="mb-3 px-3 text-xs font-semibold uppercase tracking-[.16em] text-[var(--muted)]">Không gian của bạn</p>
-          <nav className="space-y-1" aria-label="Điều hướng desktop">
-            {[["Tổng quan", "/app"], ["Tài khoản", "/app/accounts"], ["Giao dịch", "/app/transactions"], ["Ngân sách", "/app/budgets"], ["Mục tiêu", "/app/goals"], ["Báo cáo", "/app/reports"], ["Định kỳ", "/app/recurring"], ["Thông báo", "/app/notifications"]].map(([label, path], index) => (
-              <Link key={path} href={href(path)} className={`flex min-h-11 items-center rounded-xl px-3 text-sm font-semibold ${index === 0 ? "bg-[var(--brand-soft)] text-[var(--brand-strong)]" : "text-[var(--muted)] hover:bg-[var(--surface-muted)]"}`}>{label}</Link>
-            ))}
-          </nav>
-          <div className="pt-56">
-            <div className="rounded-2xl bg-[var(--surface-muted)] p-4">
-              <Sparkles size={19} className="mb-3 text-[var(--brand)]" />
-              <p className="text-sm font-semibold">Monee đang cùng bạn</p>
-              <p className="mt-1 text-xs leading-5 text-[var(--muted)]">Ghi lại từng khoản nhỏ để hiểu hơn về thói quen của mình.</p>
-            </div>
-          </div>
-        </aside>
-
-        <main className="min-w-0 px-4 pb-28 pt-5 sm:px-6 md:px-10 md:pb-12 md:pt-8 lg:px-14">
+    <main className="min-w-0 px-4 pb-28 pt-5 sm:px-6 md:px-10 md:pb-12 md:pt-8 lg:px-14">
           <header className="mx-auto flex max-w-[1060px] items-center justify-between">
             <div>
               <p className="text-sm text-[var(--muted)]">{dashboard.dateLabel}</p>
@@ -179,9 +154,6 @@ export function DashboardView({ data }: { data: DashboardSummary }) {
               </CardContent>
             </Card>
           </div>
-        </main>
-      </div>
-      <BottomNav />
-    </div>
+    </main>
   );
 }

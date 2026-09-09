@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { BottomNav } from "@/components/layout/bottom-nav";
 import { Card } from "@/components/ui/card";
 import { ProfileForm } from "@/features/profile/components/profile-form";
 import { SignOutButton } from "@/features/profile/components/sign-out-button";
@@ -20,7 +19,6 @@ export default async function ProfilePage() {
         <Card className="mt-6 p-5 shadow-[var(--shadow)] sm:p-7"><ProfileForm profile={profile} email={email} /></Card>
         <div className="mt-4"><SignOutButton /></div>
       </div>
-      <BottomNav active="profile" />
     </main>
   );
 }
