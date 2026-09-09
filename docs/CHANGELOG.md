@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-09-09 · 0.12.0
+
+### Added
+- Nút “Hoàn tác” sau khi soft-delete giao dịch, gọi RPC restore an toàn và giữ nguyên số dư.
+- Bộ lọc giao dịch theo loại và tháng hiện tại với query server-side.
+- Phân trang danh sách giao dịch, mỗi trang tối đa 50 dòng.
+
+### Changed
+- Danh sách giao dịch hiển thị đúng trạng thái bộ lọc và tiêu đề kỳ xem.
+
 ## 2026-09-09 · 0.11.0
 
 ### Added
