@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
@@ -22,7 +22,6 @@ export function ProfileForm({ profile, email, mode = "profile" }: { profile: Pro
   const router = useRouter();
   const { setTheme } = useTheme();
   const [isPending, startTransition] = useTransition();
-  const [feedback, setFeedback] = useState("");
   const form = useForm<ProfileInput>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
@@ -37,12 +36,10 @@ export function ProfileForm({ profile, email, mode = "profile" }: { profile: Pro
   const selectedTheme = useWatch({ control: form.control, name: "theme" });
 
   function submit(values: ProfileInput) {
-    setFeedback("");
     startTransition(async () => {
       const result = await saveProfileAction({ ...values, completeOnboarding: mode === "onboarding" });
       if (!result.ok) {
         const message = result.error === "SUPABASE_NOT_CONFIGURED" ? "Supabase chưa được cấu hình." : result.error;
-        setFeedback(message);
         toast.error(message);
         return;
       }
@@ -97,7 +94,6 @@ export function ProfileForm({ profile, email, mode = "profile" }: { profile: Pro
         </div>
       </fieldset>
 
-      {feedback && <p role="status" className={`rounded-xl px-3 py-2 text-sm ${feedback === "Đã lưu thay đổi." ? "bg-[var(--brand-soft)] text-[var(--brand-strong)]" : "bg-[#fff0ed] text-[var(--danger)]"}`}>{feedback}</p>}
       <Button type="submit" className="w-full" disabled={isPending}>{isPending ? "Đang lưu…" : mode === "onboarding" ? "Hoàn tất thiết lập" : "Lưu thay đổi"}</Button>
     </form>
   );

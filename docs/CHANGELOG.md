@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-09-09 · 0.18.0
+
+### Changed
+- Loại bỏ các message trạng thái inline trùng với toast sau thao tác.
+- Giữ lỗi validation cạnh trường nhập và banner “Hoàn tác” vì đây là phản hồi hoặc hành động cần thiết.
+
 ## 2026-09-09 · 0.17.0
 
 ### Added

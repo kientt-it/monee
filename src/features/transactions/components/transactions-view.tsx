@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
 import { ArrowLeftRight, ChevronLeft, ChevronRight, Coffee, Plus, WalletCards } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -32,15 +32,12 @@ function filterHref(type: TypeFilter, monthOnly: boolean, page?: number) {
 function UndoBanner({ deletedId }: { deletedId: string }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [error, setError] = useState("");
 
   function restore() {
-    setError("");
     startTransition(async () => {
       const result = await restoreTransactionAction(deletedId);
       if (!result.ok) {
         const message = result.error === "SUPABASE_NOT_CONFIGURED" ? "Bản xem trước không khôi phục dữ liệu thật." : result.error;
-        setError(message);
         toast.error(message);
         return;
       }
@@ -50,7 +47,7 @@ function UndoBanner({ deletedId }: { deletedId: string }) {
     });
   }
 
-  return <div role="status" className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[var(--brand)]/25 bg-[var(--brand-soft)] px-4 py-3 text-sm"><div><p className="font-semibold text-[var(--brand-strong)]">Đã xóa giao dịch</p>{error && <p role="alert" className="mt-1 text-[var(--danger)]">{error}</p>}</div><Button variant="secondary" size="sm" onClick={restore} disabled={isPending}>{isPending ? "Đang khôi phục…" : "Hoàn tác"}</Button></div>;
+  return <div role="status" className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[var(--brand)]/25 bg-[var(--brand-soft)] px-4 py-3 text-sm"><div><p className="font-semibold text-[var(--brand-strong)]">Đã xóa giao dịch</p></div><Button variant="secondary" size="sm" onClick={restore} disabled={isPending}>{isPending ? "Đang khôi phục…" : "Hoàn tác"}</Button></div>;
 }
 
 export function TransactionsView({ transactions, configured, hasMore, page, deletedId, typeFilter, monthOnly }: { transactions: TransactionRecord[]; configured: boolean; hasMore: boolean; page: number; deletedId?: string; typeFilter: TypeFilter; monthOnly: boolean }) {

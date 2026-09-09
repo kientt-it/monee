@@ -38,7 +38,6 @@ export function AccountsView({ accounts, configured }: { accounts: AccountRecord
   const [editingAccount, setEditingAccount] = useState<AccountRecord | null>(null);
   const [confirmingArchive, setConfirmingArchive] = useState<AccountRecord | null>(null);
   const [isPending, startTransition] = useTransition();
-  const [feedback, setFeedback] = useState("");
   const visibleAccounts = configured ? accounts : demoAccounts;
   const activeAccounts = visibleAccounts.filter((account) => !account.is_archived);
   const archivedAccounts = visibleAccounts.filter((account) => account.is_archived);
@@ -54,25 +53,21 @@ export function AccountsView({ accounts, configured }: { accounts: AccountRecord
   });
 
   function openCreateDialog() {
-    setFeedback("");
     createForm.reset({ name: "", type: "cash", initialBalance: 0, currency: "VND", color: "#087f5b", includeInTotal: true });
     setDialog("create");
   }
 
   function openEditDialog(account: AccountRecord) {
-    setFeedback("");
     setEditingAccount(account);
     editForm.reset({ name: account.name, type: account.type, currency: "VND", color: account.color ?? "#087f5b", includeInTotal: account.include_in_total });
     setDialog("edit");
   }
 
   function submitCreate(values: AccountInput) {
-    setFeedback("");
     startTransition(async () => {
       const result = await createAccountAction(values);
       if (!result.ok) {
         const message = result.error === "SUPABASE_NOT_CONFIGURED" ? "Hãy cấu hình Supabase trước khi lưu dữ liệu thật." : result.error;
-        setFeedback(message);
         toast.error(message);
         return;
       }
@@ -84,12 +79,10 @@ export function AccountsView({ accounts, configured }: { accounts: AccountRecord
 
   function submitEdit(values: AccountMetadataInput) {
     if (!editingAccount) return;
-    setFeedback("");
     startTransition(async () => {
       const result = await updateAccountAction(editingAccount.id, values);
       if (!result.ok) {
         const message = result.error === "SUPABASE_NOT_CONFIGURED" ? "Hãy cấu hình Supabase trước khi lưu dữ liệu thật." : result.error;
-        setFeedback(message);
         toast.error(message);
         return;
       }
@@ -102,11 +95,9 @@ export function AccountsView({ accounts, configured }: { accounts: AccountRecord
 
   function archiveAccount() {
     if (!confirmingArchive) return;
-    setFeedback("");
     startTransition(async () => {
       const result = await archiveAccountAction(confirmingArchive.id);
       if (!result.ok) {
-        setFeedback(result.error);
         toast.error(result.error);
         return;
       }
@@ -117,11 +108,9 @@ export function AccountsView({ accounts, configured }: { accounts: AccountRecord
   }
 
   function restoreAccount(account: AccountRecord) {
-    setFeedback("");
     startTransition(async () => {
       const result = await restoreAccountAction(account.id);
       if (!result.ok) {
-        setFeedback(result.error);
         toast.error(result.error);
         return;
       }
@@ -139,7 +128,6 @@ export function AccountsView({ accounts, configured }: { accounts: AccountRecord
         </header>
 
         {!configured && <div className="mt-5 rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface-muted)] px-4 py-3 text-sm text-[var(--muted)]">Bản xem trước · các số dư dưới đây là dữ liệu minh họa, chưa được lưu.</div>}
-        {feedback && !dialog && !confirmingArchive && <p role="alert" className="mt-5 rounded-xl bg-[#fff0ed] px-3 py-2 text-sm text-[var(--danger)]">{feedback}</p>}
 
         <Card className="mt-6 overflow-hidden bg-[var(--brand)] text-white">
           <CardContent className="p-6">
@@ -162,7 +150,7 @@ export function AccountsView({ accounts, configured }: { accounts: AccountRecord
                     <div className="flex items-center gap-3">
                       <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-white" style={{ background: account.color ?? "var(--brand)" }}><Icon size={19} /></div>
                       <div className="min-w-0 flex-1"><p className="truncate font-semibold">{account.name}</p><p className="mt-0.5 flex items-center gap-1 text-xs text-[var(--muted)]">{typeLabels[account.type]} · {account.include_in_total ? <><Eye size={12} /> Có trong tổng</> : <><EyeOff size={12} /> Không tính tổng</>}</p></div>
-                      <div className="text-right"><p className="font-bold tabular-nums">{formatCurrency(account.current_balance)}</p><div className="mt-1 flex justify-end gap-1"><button type="button" aria-label={`Sửa ${account.name}`} onClick={() => openEditDialog(account)} className="flex h-9 w-9 items-center justify-center rounded-full text-[var(--muted)] hover:bg-[var(--surface-muted)]"><Pencil size={15} /></button><button type="button" aria-label={`Lưu trữ ${account.name}`} onClick={() => { setFeedback(""); setConfirmingArchive(account); }} className="flex h-9 w-9 items-center justify-center rounded-full text-[var(--muted)] hover:bg-[var(--surface-muted)]"><Archive size={15} /></button></div></div>
+                      <div className="text-right"><p className="font-bold tabular-nums">{formatCurrency(account.current_balance)}</p><div className="mt-1 flex justify-end gap-1"><button type="button" aria-label={`Sửa ${account.name}`} onClick={() => openEditDialog(account)} className="flex h-9 w-9 items-center justify-center rounded-full text-[var(--muted)] hover:bg-[var(--surface-muted)]"><Pencil size={15} /></button><button type="button" aria-label={`Lưu trữ ${account.name}`} onClick={() => setConfirmingArchive(account)} className="flex h-9 w-9 items-center justify-center rounded-full text-[var(--muted)] hover:bg-[var(--surface-muted)]"><Archive size={15} /></button></div></div>
                     </div>
                   </Card>
                 );
@@ -193,7 +181,6 @@ export function AccountsView({ accounts, configured }: { accounts: AccountRecord
               <div className="grid grid-cols-[1fr_72px] gap-3"><label className="block text-sm font-semibold">Loại tài khoản<select {...createForm.register("type")} className="mt-2 min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-base">{Object.entries(typeLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label><label className="block text-sm font-semibold">Màu<input {...createForm.register("color")} type="color" className="mt-2 h-11 w-full cursor-pointer rounded-xl border border-[var(--border)] bg-[var(--surface)] p-1" /></label></div>
               <label className="block text-sm font-semibold">Số dư ban đầu<input {...createForm.register("initialBalance", { valueAsNumber: true })} type="number" min="0" step="1" inputMode="numeric" className="mt-2 min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-base" placeholder="0" />{createForm.formState.errors.initialBalance && <span className="mt-1 block text-xs text-[var(--danger)]">{createForm.formState.errors.initialBalance.message}</span>}</label>
               <label className="flex cursor-pointer items-start gap-3 rounded-xl bg-[var(--surface-muted)] p-3 text-sm"><input {...createForm.register("includeInTotal")} type="checkbox" className="mt-1 h-4 w-4 accent-[var(--brand)]" /><span><strong className="block">Tính vào tổng tài sản</strong><span className="mt-0.5 block text-xs text-[var(--muted)]">Có thể thay đổi sau mà không ảnh hưởng số dư.</span></span></label>
-              {feedback && <p role="alert" className="rounded-xl bg-[#fff0ed] px-3 py-2 text-sm text-[var(--danger)]">{feedback}</p>}
               <Button type="submit" className="w-full" disabled={isPending}>{isPending ? "Đang lưu…" : "Lưu tài khoản"}</Button>
             </form>
           </section>
@@ -208,7 +195,6 @@ export function AccountsView({ accounts, configured }: { accounts: AccountRecord
               <label className="block text-sm font-semibold">Tên tài khoản<input {...editForm.register("name")} autoFocus className="mt-2 min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-base" />{editForm.formState.errors.name && <span className="mt-1 block text-xs text-[var(--danger)]">{editForm.formState.errors.name.message}</span>}</label>
               <div className="grid grid-cols-[1fr_72px] gap-3"><label className="block text-sm font-semibold">Loại tài khoản<select {...editForm.register("type")} className="mt-2 min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-base">{Object.entries(typeLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label><label className="block text-sm font-semibold">Màu<input {...editForm.register("color")} type="color" className="mt-2 h-11 w-full cursor-pointer rounded-xl border border-[var(--border)] bg-[var(--surface)] p-1" /></label></div>
               <label className="flex cursor-pointer items-start gap-3 rounded-xl bg-[var(--surface-muted)] p-3 text-sm"><input {...editForm.register("includeInTotal")} type="checkbox" className="mt-1 h-4 w-4 accent-[var(--brand)]" /><span><strong className="block">Tính vào tổng tài sản</strong><span className="mt-0.5 block text-xs text-[var(--muted)]">Tắt nếu đây là tài khoản chỉ dùng để theo dõi riêng.</span></span></label>
-              {feedback && <p role="alert" className="rounded-xl bg-[#fff0ed] px-3 py-2 text-sm text-[var(--danger)]">{feedback}</p>}
               <Button type="submit" className="w-full" disabled={isPending}>{isPending ? "Đang lưu…" : "Lưu thay đổi"}</Button>
             </form>
           </section>
@@ -219,7 +205,6 @@ export function AccountsView({ accounts, configured }: { accounts: AccountRecord
         <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/35 sm:items-center sm:p-4" role="presentation">
           <section role="alertdialog" aria-modal="true" aria-labelledby="archive-title" aria-describedby="archive-description" className="w-full max-w-md rounded-t-[24px] bg-[var(--surface)] p-5 shadow-2xl sm:rounded-[24px]">
             <div className="flex items-start justify-between"><div><h2 id="archive-title" className="text-lg font-bold">Lưu trữ {confirmingArchive.name}?</h2><p id="archive-description" className="mt-2 text-sm leading-6 text-[var(--muted)]">Tài khoản sẽ không còn xuất hiện khi tạo giao dịch mới hoặc trong tổng tài sản. Số dư và lịch sử cũ vẫn được giữ nguyên.</p></div><button type="button" aria-label="Đóng" onClick={() => setConfirmingArchive(null)} className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-[var(--surface-muted)]"><X size={18} /></button></div>
-            {feedback && <p role="alert" className="mt-4 rounded-xl bg-[#fff0ed] px-3 py-2 text-sm text-[var(--danger)]">{feedback}</p>}
             <div className="mt-5 grid grid-cols-2 gap-3"><Button variant="outline" onClick={() => setConfirmingArchive(null)}>Hủy</Button><Button className="bg-[var(--danger)] hover:bg-[var(--danger)]" onClick={archiveAccount} disabled={isPending}>{isPending ? "Đang lưu trữ…" : "Lưu trữ"}</Button></div>
           </section>
         </div>

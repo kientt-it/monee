@@ -2,10 +2,10 @@
 /* React Hook Form's watch API is intentionally used for dependent transaction fields. */
 /* eslint-disable react-hooks/incompatible-library */
 
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, CalendarDays, Check, ChevronLeft } from "lucide-react";
+import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, CalendarDays, ChevronLeft } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -31,7 +31,6 @@ const fallbackCategories: CategoryOption[] = [
 export function TransactionForm({ accounts, categories, configured, transaction }: { accounts: AccountRecord[]; categories: CategoryOption[]; configured: boolean; transaction?: TransactionRecord }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [feedback, setFeedback] = useState("");
   const transactionAccountIds = new Set(transaction ? [transaction.account_id, transaction.destination_account_id].filter(Boolean) : []);
   const availableAccounts = configured ? accounts.filter((account) => !account.is_archived || transactionAccountIds.has(account.id)) : fallbackAccounts;
   const availableCategories = configured ? categories : fallbackCategories;
@@ -57,7 +56,6 @@ export function TransactionForm({ accounts, categories, configured, transaction 
   const categoriesForType = availableCategories.filter((item) => item.type === (type === "income" ? "income" : "expense"));
 
   function submit(values: TransactionFormInput) {
-    setFeedback("");
     const payload = {
       ...values,
       amount: Number(values.amount.replaceAll(".", "")),
@@ -71,12 +69,11 @@ export function TransactionForm({ accounts, categories, configured, transaction 
       const result = transaction ? await updateTransactionAction(transaction.id, payload) : await createTransactionAction(payload);
       if (!result.ok) {
         const message = result.error === "SUPABASE_NOT_CONFIGURED" ? "Hãy cấu hình Supabase trước khi lưu giao dịch thật." : result.error;
-        setFeedback(message);
         toast.error(message);
         return;
       }
       if (transaction) { toast.success("Đã cập nhật giao dịch."); router.push(`/app/transactions/${transaction.id}`); router.refresh(); return; }
-      form.reset(); setFeedback("Đã lưu giao dịch."); toast.success("Đã lưu giao dịch.");
+      form.reset(); toast.success("Đã lưu giao dịch.");
     });
   }
 
@@ -96,8 +93,7 @@ export function TransactionForm({ accounts, categories, configured, transaction 
       <div className="grid gap-4 sm:grid-cols-2"><label className="block text-sm font-semibold">Tài khoản nguồn<select {...form.register("accountId")} className="mt-2 min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-base">{availableAccounts.map((account) => <option key={account.id} value={account.id}>{account.name}{account.is_archived ? " (đã lưu trữ)" : ""}</option>)}</select></label>{type === "transfer" ? <label className="block text-sm font-semibold">Tài khoản đích<select {...form.register("destinationAccountId")} className="mt-2 min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-base"><option value="">Chọn tài khoản</option>{availableAccounts.filter((account) => account.id !== sourceAccountId).map((account) => <option key={account.id} value={account.id}>{account.name}{account.is_archived ? " (đã lưu trữ)" : ""}</option>)}</select>{form.formState.errors.destinationAccountId && <span className="mt-1 block text-xs text-[var(--danger)]">{form.formState.errors.destinationAccountId.message}</span>}</label> : <label className="block text-sm font-semibold">Danh mục<select {...form.register("categoryId")} className="mt-2 min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-base"><option value="">Chọn danh mục</option>{categoriesForType.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label>}</div>
       <div className="grid gap-4 sm:grid-cols-2"><label className="block text-sm font-semibold">Ngày giao dịch<div className="relative mt-2"><CalendarDays size={17} className="pointer-events-none absolute left-3 top-3 text-[var(--muted)]" /><input type="date" {...form.register("transactionDate")} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] pl-10 pr-3 text-base" /></div></label><label className="block text-sm font-semibold">Nơi giao dịch<input {...form.register("merchant")} className="mt-2 min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-base" placeholder="Ví dụ: Highlands" /></label></div>
       <label className="block text-sm font-semibold">Ghi chú<textarea {...form.register("note")} rows={3} className="mt-2 w-full resize-none rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-base" placeholder="Thêm ghi chú nếu cần" /></label>
-      {feedback && <p role="status" className={`rounded-xl px-3 py-2 text-sm ${feedback.startsWith("Đã") ? "bg-[var(--brand-soft)] text-[var(--brand-strong)]" : "bg-[#fff0ed] text-[var(--danger)]"}`}>{feedback}</p>}
-      <Button type="submit" className="w-full" disabled={isPending || (configured && availableAccounts.length === 0)}>{isPending ? "Đang lưu…" : feedback.startsWith("Đã") ? <><Check size={17} /> Đã lưu</> : transaction ? "Lưu thay đổi" : "Lưu giao dịch"}</Button>
+      <Button type="submit" className="w-full" disabled={isPending || (configured && availableAccounts.length === 0)}>{isPending ? "Đang lưu…" : transaction ? "Lưu thay đổi" : "Lưu giao dịch"}</Button>
     </form></Card>
   </div></main>;
 }

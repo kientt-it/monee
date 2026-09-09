@@ -33,7 +33,6 @@ export function BudgetsView({ budgets, categories, configured }: { budgets: Budg
   const router = useRouter();
   const [dialog, setDialog] = useState(false);
   const [editing, setEditing] = useState<BudgetRecord | null>(null);
-  const [feedback, setFeedback] = useState("");
   const [isPending, startTransition] = useTransition();
   const visibleBudgets = configured ? budgets : demoBudgets;
   const activeBudgets = visibleBudgets.filter((budget) => budget.isActive);
@@ -44,31 +43,29 @@ export function BudgetsView({ budgets, categories, configured }: { budgets: Budg
   });
 
   function openCreate() {
-    setEditing(null); setFeedback("");
+    setEditing(null);
     form.reset({ name: "", categoryId: null, amount: 0, period: "monthly", startDate: new Date(`${localToday()}T12:00:00`), endDate: null, alertThreshold: 75 });
     setDialog(true);
   }
 
   function openEdit(budget: BudgetRecord) {
-    setEditing(budget); setFeedback("");
+    setEditing(budget);
     form.reset({ name: budget.name, categoryId: budget.categoryId, amount: budget.amount, period: budget.period, startDate: new Date(`${budget.startDate}T12:00:00`), endDate: budget.endDate ? new Date(`${budget.endDate}T12:00:00`) : null, alertThreshold: budget.alertThreshold });
     setDialog(true);
   }
 
   function submit(values: BudgetInput) {
-    setFeedback("");
     startTransition(async () => {
       const result = await saveBudgetAction(editing?.id ?? null, values);
-      if (!result.ok) { const message = result.error === "SUPABASE_NOT_CONFIGURED" ? "Hãy cấu hình Supabase trước khi lưu dữ liệu thật." : result.error; setFeedback(message); toast.error(message); return; }
+      if (!result.ok) { const message = result.error === "SUPABASE_NOT_CONFIGURED" ? "Hãy cấu hình Supabase trước khi lưu dữ liệu thật." : result.error; toast.error(message); return; }
       setDialog(false); setEditing(null); toast.success(editing ? "Đã cập nhật ngân sách." : "Đã thêm ngân sách."); router.refresh();
     });
   }
 
   function toggle(budget: BudgetRecord) {
-    setFeedback("");
     startTransition(async () => {
       const result = await setBudgetActiveAction(budget.id, !budget.isActive);
-      if (!result.ok) { setFeedback(result.error); toast.error(result.error); return; }
+      if (!result.ok) { toast.error(result.error); return; }
       toast.success(budget.isActive ? "Đã tắt ngân sách." : "Đã bật ngân sách."); router.refresh();
     });
   }
@@ -87,7 +84,6 @@ export function BudgetsView({ budgets, categories, configured }: { budgets: Budg
   return <main className="min-h-screen bg-[var(--background)] px-4 pb-28 pt-5 sm:px-6 md:px-10 md:pb-12 md:pt-8"><div className="mx-auto max-w-[900px]">
     <header className="flex items-center justify-between gap-4"><div><p className="text-sm text-[var(--muted)]">Lập kế hoạch chi tiêu</p><h1 className="mt-1 text-2xl font-bold tracking-tight md:text-3xl">Ngân sách</h1></div><Button size="sm" onClick={openCreate}><Plus size={16} /> Thêm ngân sách</Button></header>
     {!configured && <div className="mt-5 rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface-muted)] px-4 py-3 text-sm text-[var(--muted)]">Bản xem trước · tiến độ dưới đây là dữ liệu minh họa, chưa được lưu.</div>}
-    {feedback && !dialog && <p role="alert" className="mt-5 rounded-xl bg-[#fff0ed] px-3 py-2 text-sm text-[var(--danger)]">{feedback}</p>}
     <Card className="mt-6 bg-[var(--brand)] text-white"><CardContent className="p-6"><p className="text-sm text-white/75">Theo dõi ngân sách</p><p className="mt-2 text-2xl font-bold">{activeBudgets.length} ngân sách đang hoạt động</p><p className="mt-2 text-xs leading-5 text-white/75">Đặt giới hạn cho từng nhóm chi tiêu để biết mình còn bao nhiêu trước khi kết thúc kỳ.</p></CardContent></Card>
     <section className="mt-7"><div className="mb-3 flex items-center justify-between"><h2 className="text-base font-semibold">Đang hoạt động</h2><span className="text-xs text-[var(--muted)]">Tiến độ kỳ hiện tại</span></div>{configured && activeBudgets.length === 0 ? <Card><CardContent className="p-8 text-center"><Target className="mx-auto text-[var(--brand)]" size={30} /><p className="mt-3 font-semibold">Chưa có ngân sách</p><p className="mt-1 text-sm text-[var(--muted)]">Tạo ngân sách đầu tiên để theo dõi chi tiêu theo kế hoạch.</p><Button className="mt-5" onClick={openCreate}><Plus size={16} /> Tạo ngân sách</Button></CardContent></Card> : <div className="grid gap-3 md:grid-cols-2">{activeBudgets.map(renderBudget)}</div>}</section>
     {inactiveBudgets.length > 0 && <section className="mt-8"><div className="mb-3"><h2 className="text-base font-semibold">Đã tắt</h2><p className="mt-1 text-xs text-[var(--muted)]">Lịch sử ngân sách vẫn được giữ lại.</p></div><div className="grid gap-3 md:grid-cols-2">{inactiveBudgets.map(renderBudget)}</div></section>}
@@ -97,7 +93,7 @@ export function BudgetsView({ budgets, categories, configured }: { budgets: Budg
       <div className="grid gap-4 sm:grid-cols-2"><label className="block text-sm font-semibold">Số tiền tối đa<input {...form.register("amount", { valueAsNumber: true })} type="number" min="1" step="1" inputMode="numeric" className="mt-2 min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-base" placeholder="0" />{form.formState.errors.amount && <span className="mt-1 block text-xs text-[var(--danger)]">{form.formState.errors.amount.message}</span>}</label><label className="block text-sm font-semibold">Cảnh báo từ (%)<input {...form.register("alertThreshold", { valueAsNumber: true })} type="number" min="1" max="100" step="1" className="mt-2 min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-base" />{form.formState.errors.alertThreshold && <span className="mt-1 block text-xs text-[var(--danger)]">{form.formState.errors.alertThreshold.message}</span>}</label></div>
       <div className="grid gap-4 sm:grid-cols-2"><label className="block text-sm font-semibold">Áp dụng cho<select {...form.register("categoryId")} className="mt-2 min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-base"><option value="">Tất cả chi tiêu</option>{categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label><label className="block text-sm font-semibold">Chu kỳ<select {...form.register("period")} className="mt-2 min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-base">{Object.entries(periodLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label></div>
       <div className="grid gap-4 sm:grid-cols-2"><label className="block text-sm font-semibold">Ngày bắt đầu<div className="relative mt-2"><CalendarDays size={16} className="pointer-events-none absolute left-3 top-3 text-[var(--muted)]" /><input type="date" {...form.register("startDate", { valueAsDate: true })} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] pl-10 pr-2 text-base" /> </div></label><label className="block text-sm font-semibold">Ngày kết thúc <span className="font-normal text-[var(--muted)]">(tùy chọn)</span><input type="date" {...form.register("endDate", { setValueAs: (value) => value ? new Date(`${value}T12:00:00`) : null })} className="mt-2 min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-base" /></label></div>
-      {feedback && <p role="alert" className="rounded-xl bg-[#fff0ed] px-3 py-2 text-sm text-[var(--danger)]">{feedback}</p>}<Button type="submit" className="w-full" disabled={isPending}>{isPending ? "Đang lưu…" : <><Check size={17} /> Lưu ngân sách</>}</Button>
+      <Button type="submit" className="w-full" disabled={isPending}>{isPending ? "Đang lưu…" : <><Check size={17} /> Lưu ngân sách</>}</Button>
     </form></section></div>}
   </main>;
 }
