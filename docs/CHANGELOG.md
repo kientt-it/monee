@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-09-09 · 0.11.0
+
+### Added
+- Migration scheduler với RPC `process_due_recurring_transactions`, execution log chống trùng và transaction helper service-role.
+- Edge Function `supabase/functions/recurring-scheduler` bảo vệ bằng secret, xử lý due schedules và sinh notification thành công/thất bại.
+- 3 schema tests cho recurring; tổng cộng 27 tests pass.
+
+### Changed
+- Recurring từ quản lý cấu hình đã có đường thực thi server-side; vẫn cần deploy function và cấu hình cron để chạy tự động.
+
 ## 2026-09-09 · 0.10.0
 
 ### Added

@@ -17,6 +17,7 @@
 - Tắt budget chỉ đổi `is_active` để giữ lịch sử; không xóa dữ liệu kế hoạch đã tạo.
 - Goal lưu `target_amount` dương và `current_amount` không âm; progress không vượt quá 100% khi hiển thị.
 - Contribution lưu amount dương trong lịch sử và cập nhật `saving_goals.current_amount` trong cùng một RPC có row lock. Khi đạt target, goal tự chuyển sang `completed`; không sửa tay current amount sau khi tạo.
-- Recurring record chỉ mô tả lịch; chưa được xem là transaction và chưa làm thay đổi balance cho tới khi scheduler thực thi qua flow atomic.
+- Recurring record chỉ mô tả lịch; không làm thay đổi balance cho tới khi scheduler thực thi qua flow atomic. Mỗi ngày chạy có tối đa một execution log nhờ unique key.
 - Tắt recurring chỉ đổi `is_active`; giữ lại cấu hình, execution log và lịch sử giao dịch đã tạo.
 - Notification chỉ hiển thị dữ liệu user sở hữu; mark read không thay đổi dữ liệu tài chính.
+- Scheduler chỉ xử lý recurring active đã đến `next_run_date`, tạo transaction ở ngày lịch với idempotency key riêng, cập nhật `next_run_date` và tự tắt sau `end_date`. Lỗi được ghi execution log failed và notification để người dùng kiểm tra.
