@@ -80,7 +80,7 @@ export function DashboardView({ preview = false, data }: { preview?: boolean; da
           </div>
           <p className="mb-3 px-3 text-xs font-semibold uppercase tracking-[.16em] text-[var(--muted)]">Không gian của bạn</p>
           <nav className="space-y-1" aria-label="Điều hướng desktop">
-            {[["Tổng quan", "/app"], ["Tài khoản", "/app/accounts"], ["Giao dịch", "/app/transactions"], ["Ngân sách", "/app/budgets"], ["Mục tiêu", "/app/goals"], ["Báo cáo", "/app/reports"]].map(([label, path], index) => (
+            {[["Tổng quan", "/app"], ["Tài khoản", "/app/accounts"], ["Giao dịch", "/app/transactions"], ["Ngân sách", "/app/budgets"], ["Mục tiêu", "/app/goals"], ["Báo cáo", "/app/reports"], ["Định kỳ", "/app/recurring"], ["Thông báo", "/app/notifications"]].map(([label, path], index) => (
               <Link key={path} href={href(path)} className={`flex min-h-11 items-center rounded-xl px-3 text-sm font-semibold ${index === 0 ? "bg-[var(--brand-soft)] text-[var(--brand-strong)]" : "text-[var(--muted)] hover:bg-[var(--surface-muted)]"}`}>{label}</Link>
             ))}
           </nav>
@@ -99,10 +99,10 @@ export function DashboardView({ preview = false, data }: { preview?: boolean; da
               <p className="text-sm text-[var(--muted)]">{dashboard.dateLabel}</p>
               <h1 className="mt-1 text-2xl font-bold tracking-tight md:text-3xl">Chào bạn, {dashboard.greetingName} <span aria-hidden="true">👋</span></h1>
             </div>
-            <button aria-label={dashboard.unreadNotifications > 0 ? `${dashboard.unreadNotifications} thông báo chưa đọc` : "Xem thông báo"} className="relative flex h-11 w-11 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)]">
+            <Link href={href("/app/notifications")} aria-label={dashboard.unreadNotifications > 0 ? `${dashboard.unreadNotifications} thông báo chưa đọc` : "Xem thông báo"} className="relative flex h-11 w-11 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)]">
               <Bell size={19} />
               {dashboard.unreadNotifications > 0 && <span className="absolute right-2.5 top-2 h-2 w-2 rounded-full bg-[#eb7665]" />}
-            </button>
+            </Link>
           </header>
 
           <div className="mx-auto mt-7 max-w-[1060px] space-y-5">

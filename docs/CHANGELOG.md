@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-09-09 · 0.10.0
+
+### Added
+- Trang `/app/recurring` với create/edit, loại giao dịch, frequency, next run date và bật/tắt lịch.
+- Trang `/app/notifications` với trạng thái chưa đọc và đánh dấu đã đọc một hoặc tất cả.
+- 3 schema tests cho recurring; tổng cộng 27 tests pass.
+
+### Changed
+- Dashboard bell mở trang thông báo; desktop navigation có thêm Định kỳ và Thông báo.
+- Recurring chưa thực thi giao dịch cho đến khi scheduler được bật.
+
 ## 2026-09-09 · 0.9.0
 
 ### Added

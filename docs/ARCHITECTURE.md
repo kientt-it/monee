@@ -14,6 +14,8 @@ Reports dùng Server Component query `/app/reports` với range an toàn từ se
 
 Goals dùng Server Component query `/app/goals` để đọc goal, contribution history và account liên kết. Metadata create/edit/status qua Server Action + Zod + RLS; contribution chỉ qua `add_saving_goal_contribution` RPC security definer có row lock, tránh race condition giữa lịch sử và cached amount.
 
+Recurring và Notifications dùng Server Components + Server Actions với auth/RLS. Recurring management chỉ lưu cấu hình và ngày chạy kế tiếp; scheduler/Edge Function là follow-up riêng để thực thi qua transaction RPC. Notification view đọc theo user và các action chỉ cập nhật `is_read`.
+
 Next Proxy refresh session, bảo vệ route và enforce onboarding theo `profiles.onboarding_completed`. Profile được đọc qua request-scoped React cache; update đi qua Server Action với Zod và RLS. `next-themes` áp dụng preference đã lưu bằng `data-theme`.
 
 Financial domain có hàm thuần `applyTransactionEffect`, `replaceTransactionEffect`, `removeTransactionEffect` để dùng làm executable specification và unit test cho effect/reverse.

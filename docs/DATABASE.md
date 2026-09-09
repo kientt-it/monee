@@ -29,5 +29,7 @@ Budgets MVP sử dụng trực tiếp bảng `budgets` và policy hiện có, kh
 
 Migration `supabase/migrations/202609091200_saving_goal_contribution.sql` thêm RPC `add_saving_goal_contribution`, khóa goal, insert contribution và cập nhật `current_amount/status` atomic. Người triển khai cần apply migration này trước khi dùng nút thêm đóng góp.
 
+Recurring và notifications dùng bảng, policy và execution-log schema có sẵn từ migration nền tảng; chưa có migration scheduler mới. Cần triển khai job riêng để xử lý record quá hạn và ghi transaction atomic.
+
 ## Indexes
 Transaction theo user/date, user/type, account, category và idempotency; account/budget/goal theo user; recurring theo user/next_run_date.
