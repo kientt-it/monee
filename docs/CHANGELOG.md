@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-09-09 · 0.8.0
+
+### Added
+- Trang `/app/reports` với bộ lọc tuần/tháng/năm/tùy chỉnh.
+- Summary thu nhập, chi tiêu, dòng tiền ròng, tỷ lệ tiết kiệm, nhóm chi tiêu và biểu đồ xu hướng 6 tháng/8 tuần/5 năm.
+- 3 tests cho logic chọn kỳ báo cáo; tổng cộng 21 tests pass.
+
+### Changed
+- Báo cáo chỉ tính các khoản income/expense chưa soft-delete; transfer không xuất hiện trong thu/chi.
+
 ## 2026-09-09 · 0.7.0
 
 ### Added

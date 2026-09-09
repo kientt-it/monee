@@ -10,6 +10,8 @@ Account metadata edit/archive/restore đi qua Server Actions, auth check, Zod v�
 
 Budgets dùng Server Component query `/app/budgets` để đọc budget, category expense và giao dịch trong các cửa sổ hiện tại; view model tính spent/remaining/status bằng domain calculation. Create/edit/toggle đi qua Server Action với Zod, auth, kiểm tra category expense và RLS; dashboard dùng lại dữ liệu budget tháng cho summary.
 
+Reports dùng Server Component query `/app/reports` với range an toàn từ search params, lấy transactions theo trend window rồi chuẩn hóa tại server thành summary, top categories và trend series. Chart là client-only Recharts component nhận view model đã chuẩn hóa; transfer và transaction soft-deleted không xuất hiện trong báo cáo.
+
 Next Proxy refresh session, bảo vệ route và enforce onboarding theo `profiles.onboarding_completed`. Profile được đọc qua request-scoped React cache; update đi qua Server Action với Zod và RLS. `next-themes` áp dụng preference đã lưu bằng `data-theme`.
 
 Financial domain có hàm thuần `applyTransactionEffect`, `replaceTransactionEffect`, `removeTransactionEffect` để dùng làm executable specification và unit test cho effect/reverse.
