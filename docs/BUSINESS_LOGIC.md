@@ -15,3 +15,5 @@
 - Budget amount lưu số dương; budget theo danh mục chỉ tính expense đúng category, budget không chọn danh mục tính mọi expense trong kỳ.
 - Progress budget dùng kỳ weekly/monthly/yearly/custom, chỉ tính giao dịch chưa soft-delete trong cửa sổ hiện tại; trạng thái hiển thị là normal dưới 75%, warning từ 75%, strong warning từ 90% và over từ 100%.
 - Tắt budget chỉ đổi `is_active` để giữ lịch sử; không xóa dữ liệu kế hoạch đã tạo.
+- Goal lưu `target_amount` dương và `current_amount` không âm; progress không vượt quá 100% khi hiển thị.
+- Contribution lưu amount dương trong lịch sử và cập nhật `saving_goals.current_amount` trong cùng một RPC có row lock. Khi đạt target, goal tự chuyển sang `completed`; không sửa tay current amount sau khi tạo.

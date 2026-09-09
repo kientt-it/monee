@@ -12,6 +12,8 @@ Budgets dùng Server Component query `/app/budgets` để đọc budget, categor
 
 Reports dùng Server Component query `/app/reports` với range an toàn từ search params, lấy transactions theo trend window rồi chuẩn hóa tại server thành summary, top categories và trend series. Chart là client-only Recharts component nhận view model đã chuẩn hóa; transfer và transaction soft-deleted không xuất hiện trong báo cáo.
 
+Goals dùng Server Component query `/app/goals` để đọc goal, contribution history và account liên kết. Metadata create/edit/status qua Server Action + Zod + RLS; contribution chỉ qua `add_saving_goal_contribution` RPC security definer có row lock, tránh race condition giữa lịch sử và cached amount.
+
 Next Proxy refresh session, bảo vệ route và enforce onboarding theo `profiles.onboarding_completed`. Profile được đọc qua request-scoped React cache; update đi qua Server Action với Zod và RLS. `next-themes` áp dụng preference đã lưu bằng `data-theme`.
 
 Financial domain có hàm thuần `applyTransactionEffect`, `replaceTransactionEffect`, `removeTransactionEffect` để dùng làm executable specification và unit test cho effect/reverse.

@@ -27,5 +27,7 @@ Accounts edit/archive/restore dùng column grant metadata hiện có, không c�
 
 Budgets MVP sử dụng trực tiếp bảng `budgets` và policy hiện có, không cần migration mới. Server Action chỉ cho phép category expense mặc định hoặc category thuộc user; tắt budget bằng `is_active = false` thay vì hard delete. Progress được tính từ transactions chưa xóa mềm ở request time.
 
+Migration `supabase/migrations/202609091200_saving_goal_contribution.sql` thêm RPC `add_saving_goal_contribution`, khóa goal, insert contribution và cập nhật `current_amount/status` atomic. Người triển khai cần apply migration này trước khi dùng nút thêm đóng góp.
+
 ## Indexes
 Transaction theo user/date, user/type, account, category và idempotency; account/budget/goal theo user; recurring theo user/next_run_date.

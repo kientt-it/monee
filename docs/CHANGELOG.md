@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-09-09 · 0.9.0
+
+### Added
+- Trang `/app/goals` với create/edit, target date/account, progress, pause/resume và contribution history.
+- RPC atomic `add_saving_goal_contribution` cập nhật contribution và cached goal amount cùng lúc.
+- 3 schema tests cho goal/contribution; tổng cộng 24 tests pass.
+
+### Changed
+- Dashboard mục tiêu hiện có route quản lý thật phía sau liên kết `/app/goals`.
+
 ## 2026-09-09 · 0.8.0
 
 ### Added

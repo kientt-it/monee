@@ -8,6 +8,6 @@
 | Transactions | Implemented MVP core | List/detail/create/edit/soft-delete; atomic RPC; 9 domain tests; filters/pagination/receipt planned |
 | Budgets | Implemented MVP core | `/app/budgets`: create/edit, category/all spending, weekly/monthly/yearly/custom periods, current-period progress, warning threshold, active/inactive history |
 | Reports | Implemented MVP core | `/app/reports`: week/month/year/custom, summary thu-chi-ròng-saving rate, top categories và trend chart |
-| Saving goals | Foundation | Schema + Zod; contribution UI planned |
+| Saving goals | Implemented MVP core | `/app/goals`: create/edit, target date/account, progress, pause/resume và contribution history qua atomic RPC |
 | Recurring | Foundation | Tables + idempotent execution log; scheduler planned |
 | PWA | Partial | Manifest, icon, service worker shell |
