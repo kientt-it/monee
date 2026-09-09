@@ -5,11 +5,12 @@ import { z } from "zod";
 import { transactionSchema } from "@/features/transactions/schemas/transaction.schema";
 import { mapTransactionError } from "@/features/transactions/services/map-transaction-error";
 import { createClient } from "@/lib/supabase/server";
+import { getSupabaseConfig } from "@/lib/supabase/env";
 
 const updateSchema = z.object({ id: z.string().uuid(), transaction: transactionSchema });
 
 export async function updateTransactionAction(id: string, input: unknown) {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) return { ok: false as const, error: "SUPABASE_NOT_CONFIGURED" };
+  if (!getSupabaseConfig().configured) return { ok: false as const, error: "SUPABASE_NOT_CONFIGURED" };
   const parsed = updateSchema.safeParse({ id, transaction: input });
   if (!parsed.success) return { ok: false as const, error: "Dữ liệu giao dịch chưa hợp lệ." };
   const supabase = await createClient();

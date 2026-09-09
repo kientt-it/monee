@@ -1,9 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
+import { getSupabaseConfig } from "@/lib/supabase/env";
 import type { AccountRecord } from "@/features/accounts/queries/get-accounts";
 
 export type CategoryOption = { id: string; name: string; type: "expense" | "income" };
 export async function getTransactionOptions() {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) return { accounts: [] as AccountRecord[], categories: [] as CategoryOption[], configured: false };
+  if (!getSupabaseConfig().configured) return { accounts: [] as AccountRecord[], categories: [] as CategoryOption[], configured: false };
   const supabase = await createClient(); const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { accounts: [] as AccountRecord[], categories: [] as CategoryOption[], configured: true };
   const [{ data: accounts, error: accountsError }, { data: categories, error: categoriesError }] = await Promise.all([

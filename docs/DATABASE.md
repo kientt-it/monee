@@ -4,6 +4,8 @@ Active migrations:
 - `supabase/migrations/202609071600_initial_foundation.sql`
 - `supabase/migrations/202609071930_transaction_update_delete.sql`
 
+Hai migration đã được người dùng apply lên Supabase dev ngày 2026-09-09. Kết nối Auth endpoint từ workspace phản hồi thành công; kiểm thử tích hợp bằng authenticated test user vẫn là follow-up.
+
 ## Tables
 `profiles`, `accounts`, `categories`, `transactions`, `tags`, `transaction_tags`, `budgets`, `saving_goals`, `saving_goal_contributions`, `recurring_transactions`, `recurring_execution_logs`, `notifications`.
 

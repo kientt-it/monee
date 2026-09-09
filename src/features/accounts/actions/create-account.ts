@@ -3,9 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { accountSchema } from "@/features/accounts/schemas/account.schema";
 import { createClient } from "@/lib/supabase/server";
+import { getSupabaseConfig } from "@/lib/supabase/env";
 
 export async function createAccountAction(input: unknown) {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) return { ok: false as const, error: "SUPABASE_NOT_CONFIGURED" };
+  if (!getSupabaseConfig().configured) return { ok: false as const, error: "SUPABASE_NOT_CONFIGURED" };
   const parsed = accountSchema.safeParse(input);
   if (!parsed.success) return { ok: false as const, error: "Dữ liệu tài khoản chưa hợp lệ." };
   const supabase = await createClient();

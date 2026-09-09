@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getSupabaseConfig } from "@/lib/supabase/env";
 
 export type AccountRecord = {
   id: string;
@@ -12,7 +13,7 @@ export type AccountRecord = {
 };
 
 export async function getAccounts() {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) return { accounts: [] as AccountRecord[], configured: false };
+  if (!getSupabaseConfig().configured) return { accounts: [] as AccountRecord[], configured: false };
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { accounts: [] as AccountRecord[], configured: true };

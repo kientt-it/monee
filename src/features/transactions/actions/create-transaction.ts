@@ -4,9 +4,10 @@ import { revalidatePath } from "next/cache";
 import { transactionSchema } from "@/features/transactions/schemas/transaction.schema";
 import { mapTransactionError } from "@/features/transactions/services/map-transaction-error";
 import { createClient } from "@/lib/supabase/server";
+import { getSupabaseConfig } from "@/lib/supabase/env";
 
 export async function createTransactionAction(input: unknown) {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) return { ok: false as const, error: "SUPABASE_NOT_CONFIGURED" };
+  if (!getSupabaseConfig().configured) return { ok: false as const, error: "SUPABASE_NOT_CONFIGURED" };
   const parsed = transactionSchema.safeParse(input);
   if (!parsed.success) return { ok: false as const, error: "Dữ liệu giao dịch chưa hợp lệ." };
   const supabase = await createClient();
