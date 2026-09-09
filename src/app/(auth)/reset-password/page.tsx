@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/client";
+import { toast } from "sonner";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -16,14 +17,15 @@ export default function ResetPasswordPage() {
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setMessage("");
-    if (password.length < 8) { setMessage("Mật khẩu cần ít nhất 8 ký tự."); return; }
-    if (password !== confirmation) { setMessage("Hai mật khẩu chưa khớp."); return; }
+    if (password.length < 8) { const message = "Mật khẩu cần ít nhất 8 ký tự."; setMessage(message); toast.error(message); return; }
+    if (password !== confirmation) { const message = "Hai mật khẩu chưa khớp."; setMessage(message); toast.error(message); return; }
     setLoading(true);
     const supabase = createClient();
     const { error } = await supabase.auth.updateUser({ password });
     setLoading(false);
-    if (error) { setMessage("Liên kết đã hết hạn hoặc không hợp lệ. Vui lòng yêu cầu lại."); return; }
+    if (error) { const message = "Liên kết đã hết hạn hoặc không hợp lệ. Vui lòng yêu cầu lại."; setMessage(message); toast.error(message); return; }
     await supabase.auth.signOut();
+    toast.success("Đã cập nhật mật khẩu.");
     router.replace("/login");
     router.refresh();
   }

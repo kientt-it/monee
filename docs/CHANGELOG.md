@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-09-09 · 0.17.0
+
+### Added
+- Bổ sung toast dùng chung cho trạng thái thành công và thất bại của các luồng Auth, hồ sơ, tài khoản, giao dịch, ngân sách, mục tiêu, định kỳ, thông báo và đăng xuất.
+- Giữ lỗi validation ngay trong form để người dùng biết chính xác trường cần sửa.
+
 ## 2026-09-09 · 0.16.0
 
 ### Added

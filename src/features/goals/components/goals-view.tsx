@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { CalendarDays, Check, Pencil, Plus, RotateCcw, Target, X } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { addGoalContributionAction, saveGoalAction, setGoalStatusAction } from "@/features/goals/actions/save-goal";
@@ -36,9 +37,9 @@ export function GoalsView({ goals, accounts, configured }: { goals: SavingGoalRe
   function openCreate() { setEditing(null); setFeedback(""); goalForm.reset({ name: "", targetAmount: 0, currentAmount: 0, targetDate: new Date(`${localToday()}T12:00:00`), icon: "🎯", color: "#8795c4", accountId: null }); setDialog("goal"); }
   function openEdit(goal: SavingGoalRecord) { setEditing(goal); setFeedback(""); goalForm.reset({ name: goal.name, targetAmount: goal.targetAmount, currentAmount: goal.currentAmount, targetDate: goal.targetDate ? new Date(`${goal.targetDate}T12:00:00`) : null, icon: goal.icon, color: goal.color, accountId: goal.accountId }); setDialog("goal"); }
   function openContribution(goal: SavingGoalRecord) { setContributing(goal); setFeedback(""); contributionForm.reset({ amount: 0, contributionDate: new Date(`${localToday()}T12:00:00`), note: "" }); setDialog("contribution"); }
-  function submitGoal(values: SavingGoalInput) { setFeedback(""); startTransition(async () => { const result = await saveGoalAction(editing?.id ?? null, values); if (!result.ok) { setFeedback(result.error === "SUPABASE_NOT_CONFIGURED" ? "Hãy cấu hình Supabase trước khi lưu dữ liệu thật." : result.error); return; } setDialog(null); setEditing(null); router.refresh(); }); }
-  function submitContribution(values: SavingGoalContributionInput) { if (!contributing) return; setFeedback(""); startTransition(async () => { const result = await addGoalContributionAction(contributing.id, values); if (!result.ok) { setFeedback(result.error === "SUPABASE_NOT_CONFIGURED" ? "Hãy cấu hình Supabase trước khi lưu dữ liệu thật." : result.error); return; } setDialog(null); setContributing(null); router.refresh(); }); }
-  function toggleGoal(goal: SavingGoalRecord) { setFeedback(""); startTransition(async () => { const result = await setGoalStatusAction(goal.id, goal.status === "paused" ? "active" : "paused"); if (!result.ok) { setFeedback(result.error); return; } router.refresh(); }); }
+  function submitGoal(values: SavingGoalInput) { setFeedback(""); startTransition(async () => { const result = await saveGoalAction(editing?.id ?? null, values); if (!result.ok) { const message = result.error === "SUPABASE_NOT_CONFIGURED" ? "Hãy cấu hình Supabase trước khi lưu dữ liệu thật." : result.error; setFeedback(message); toast.error(message); return; } setDialog(null); setEditing(null); toast.success(editing ? "Đã cập nhật mục tiêu." : "Đã thêm mục tiêu."); router.refresh(); }); }
+  function submitContribution(values: SavingGoalContributionInput) { if (!contributing) return; setFeedback(""); startTransition(async () => { const result = await addGoalContributionAction(contributing.id, values); if (!result.ok) { const message = result.error === "SUPABASE_NOT_CONFIGURED" ? "Hãy cấu hình Supabase trước khi lưu dữ liệu thật." : result.error; setFeedback(message); toast.error(message); return; } setDialog(null); setContributing(null); toast.success("Đã ghi nhận đóng góp."); router.refresh(); }); }
+  function toggleGoal(goal: SavingGoalRecord) { setFeedback(""); startTransition(async () => { const result = await setGoalStatusAction(goal.id, goal.status === "paused" ? "active" : "paused"); if (!result.ok) { setFeedback(result.error); toast.error(result.error); return; } toast.success(goal.status === "paused" ? "Đã tiếp tục mục tiêu." : "Đã tạm dừng mục tiêu."); router.refresh(); }); }
 
   function renderGoal(goal: SavingGoalRecord) {
     const isPaused = goal.status === "paused";

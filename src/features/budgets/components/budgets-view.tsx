@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { CalendarDays, Check, Pencil, Plus, RotateCcw, Target, X } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { saveBudgetAction, setBudgetActiveAction } from "@/features/budgets/actions/save-budget";
@@ -58,8 +59,8 @@ export function BudgetsView({ budgets, categories, configured }: { budgets: Budg
     setFeedback("");
     startTransition(async () => {
       const result = await saveBudgetAction(editing?.id ?? null, values);
-      if (!result.ok) { setFeedback(result.error === "SUPABASE_NOT_CONFIGURED" ? "Hãy cấu hình Supabase trước khi lưu dữ liệu thật." : result.error); return; }
-      setDialog(false); setEditing(null); router.refresh();
+      if (!result.ok) { const message = result.error === "SUPABASE_NOT_CONFIGURED" ? "Hãy cấu hình Supabase trước khi lưu dữ liệu thật." : result.error; setFeedback(message); toast.error(message); return; }
+      setDialog(false); setEditing(null); toast.success(editing ? "Đã cập nhật ngân sách." : "Đã thêm ngân sách."); router.refresh();
     });
   }
 
@@ -67,8 +68,8 @@ export function BudgetsView({ budgets, categories, configured }: { budgets: Budg
     setFeedback("");
     startTransition(async () => {
       const result = await setBudgetActiveAction(budget.id, !budget.isActive);
-      if (!result.ok) { setFeedback(result.error); return; }
-      router.refresh();
+      if (!result.ok) { setFeedback(result.error); toast.error(result.error); return; }
+      toast.success(budget.isActive ? "Đã tắt ngân sách." : "Đã bật ngân sách."); router.refresh();
     });
   }
 

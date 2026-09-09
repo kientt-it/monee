@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { ArrowLeftRight, ChevronLeft, ChevronRight, Coffee, Plus, WalletCards } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { restoreTransactionAction } from "@/features/transactions/actions/delete-transaction";
@@ -38,9 +39,12 @@ function UndoBanner({ deletedId }: { deletedId: string }) {
     startTransition(async () => {
       const result = await restoreTransactionAction(deletedId);
       if (!result.ok) {
-        setError(result.error === "SUPABASE_NOT_CONFIGURED" ? "Bản xem trước không khôi phục dữ liệu thật." : result.error);
+        const message = result.error === "SUPABASE_NOT_CONFIGURED" ? "Bản xem trước không khôi phục dữ liệu thật." : result.error;
+        setError(message);
+        toast.error(message);
         return;
       }
+      toast.success("Đã khôi phục giao dịch.");
       router.replace("/app/transactions");
       router.refresh();
     });

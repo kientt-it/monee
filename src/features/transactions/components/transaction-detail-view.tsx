@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, CalendarDays, ChevronLeft, Pencil, Trash2, WalletCards, X } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { deleteTransactionAction } from "@/features/transactions/actions/delete-transaction";
@@ -21,7 +22,7 @@ export function TransactionDetailView({ transaction, accounts, categories, confi
   const source = accounts.find((item) => item.id === transaction.account_id)?.name ?? (transaction.account_id.endsWith("1") ? "Tiền mặt" : "Tài khoản");
   const destination = accounts.find((item) => item.id === transaction.destination_account_id)?.name ?? "Tài khoản đích";
   const category = categories.find((item) => item.id === transaction.category_id)?.name ?? (transaction.type === "income" ? "Thu nhập" : "Ăn uống");
-  function remove() { setError(""); startTransition(async () => { const result = await deleteTransactionAction(transaction.id); if (!result.ok) { setError(result.error === "SUPABASE_NOT_CONFIGURED" ? "Bản xem trước không xóa dữ liệu thật." : result.error); return; } router.push(`/app/transactions?deleted=${encodeURIComponent(transaction.id)}`); router.refresh(); }); }
+  function remove() { setError(""); startTransition(async () => { const result = await deleteTransactionAction(transaction.id); if (!result.ok) { const message = result.error === "SUPABASE_NOT_CONFIGURED" ? "Bản xem trước không xóa dữ liệu thật." : result.error; setError(message); toast.error(message); return; } toast.success("Đã xóa giao dịch. Bạn có thể hoàn tác ở danh sách giao dịch."); router.push(`/app/transactions?deleted=${encodeURIComponent(transaction.id)}`); router.refresh(); }); }
   return <main className="min-h-screen bg-[var(--background)] px-4 pb-10 pt-5 sm:px-6 md:px-10 md:pt-8"><div className="mx-auto max-w-2xl">
     <header className="flex items-center justify-between"><div className="flex items-center gap-3"><Link href="/app/transactions" aria-label="Quay lại danh sách giao dịch" className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)]"><ChevronLeft size={19} /></Link><div><p className="text-sm text-[var(--muted)]">Chi tiết</p><h1 className="mt-0.5 text-2xl font-bold tracking-tight">Giao dịch</h1></div></div><Link href={`/app/transactions/${transaction.id}/edit`}><Button variant="outline" size="sm"><Pencil size={15} /> Sửa</Button></Link></header>
     {!configured && <div className="mt-5 rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface-muted)] px-4 py-3 text-sm text-[var(--muted)]">Bản xem trước · đây là dữ liệu minh họa.</div>}

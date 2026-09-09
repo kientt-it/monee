@@ -6,6 +6,7 @@ import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, CalendarDays, Check, ChevronLeft } from "lucide-react";
+import { toast } from "sonner";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -69,11 +70,13 @@ export function TransactionForm({ accounts, categories, configured, transaction 
     startTransition(async () => {
       const result = transaction ? await updateTransactionAction(transaction.id, payload) : await createTransactionAction(payload);
       if (!result.ok) {
-        setFeedback(result.error === "SUPABASE_NOT_CONFIGURED" ? "Hãy cấu hình Supabase trước khi lưu giao dịch thật." : result.error);
+        const message = result.error === "SUPABASE_NOT_CONFIGURED" ? "Hãy cấu hình Supabase trước khi lưu giao dịch thật." : result.error;
+        setFeedback(message);
+        toast.error(message);
         return;
       }
-      if (transaction) { router.push(`/app/transactions/${transaction.id}`); router.refresh(); return; }
-      form.reset(); setFeedback("Đã lưu giao dịch.");
+      if (transaction) { toast.success("Đã cập nhật giao dịch."); router.push(`/app/transactions/${transaction.id}`); router.refresh(); return; }
+      form.reset(); setFeedback("Đã lưu giao dịch."); toast.success("Đã lưu giao dịch.");
     });
   }
 

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { PwaRegister } from "@/components/pwa-register";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "Monee — Quản lý tài chính cá nhân",
@@ -18,7 +19,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="vi" suppressHydrationWarning>
-      <body><ThemeProvider><PwaRegister />{children}</ThemeProvider></body>
+      <body><ThemeProvider><Toaster position="top-right" closeButton richColors duration={3500} /><PwaRegister />{children}</ThemeProvider></body>
     </html>
   );
 }

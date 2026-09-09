@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Archive, ArchiveRestore, Building2, CreditCard, Eye, EyeOff, Landmark, Pencil, Plus, WalletCards, X } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { createAccountAction } from "@/features/accounts/actions/create-account";
@@ -70,10 +71,13 @@ export function AccountsView({ accounts, configured }: { accounts: AccountRecord
     startTransition(async () => {
       const result = await createAccountAction(values);
       if (!result.ok) {
-        setFeedback(result.error === "SUPABASE_NOT_CONFIGURED" ? "Hãy cấu hình Supabase trước khi lưu dữ liệu thật." : result.error);
+        const message = result.error === "SUPABASE_NOT_CONFIGURED" ? "Hãy cấu hình Supabase trước khi lưu dữ liệu thật." : result.error;
+        setFeedback(message);
+        toast.error(message);
         return;
       }
       setDialog(null);
+      toast.success("Đã thêm tài khoản.");
       router.refresh();
     });
   }
@@ -84,11 +88,14 @@ export function AccountsView({ accounts, configured }: { accounts: AccountRecord
     startTransition(async () => {
       const result = await updateAccountAction(editingAccount.id, values);
       if (!result.ok) {
-        setFeedback(result.error === "SUPABASE_NOT_CONFIGURED" ? "Hãy cấu hình Supabase trước khi lưu dữ liệu thật." : result.error);
+        const message = result.error === "SUPABASE_NOT_CONFIGURED" ? "Hãy cấu hình Supabase trước khi lưu dữ liệu thật." : result.error;
+        setFeedback(message);
+        toast.error(message);
         return;
       }
       setDialog(null);
       setEditingAccount(null);
+      toast.success("Đã cập nhật tài khoản.");
       router.refresh();
     });
   }
@@ -100,9 +107,11 @@ export function AccountsView({ accounts, configured }: { accounts: AccountRecord
       const result = await archiveAccountAction(confirmingArchive.id);
       if (!result.ok) {
         setFeedback(result.error);
+        toast.error(result.error);
         return;
       }
       setConfirmingArchive(null);
+      toast.success("Đã lưu trữ tài khoản.");
       router.refresh();
     });
   }
@@ -113,8 +122,10 @@ export function AccountsView({ accounts, configured }: { accounts: AccountRecord
       const result = await restoreAccountAction(account.id);
       if (!result.ok) {
         setFeedback(result.error);
+        toast.error(result.error);
         return;
       }
+      toast.success("Đã khôi phục tài khoản.");
       router.refresh();
     });
   }

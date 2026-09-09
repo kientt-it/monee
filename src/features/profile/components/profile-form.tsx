@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
 import { Check, Laptop, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { saveProfileAction } from "@/features/profile/actions/save-profile";
 import type { ProfileRecord } from "@/features/profile/queries/get-current-profile";
@@ -40,15 +41,18 @@ export function ProfileForm({ profile, email, mode = "profile" }: { profile: Pro
     startTransition(async () => {
       const result = await saveProfileAction({ ...values, completeOnboarding: mode === "onboarding" });
       if (!result.ok) {
-        setFeedback(result.error === "SUPABASE_NOT_CONFIGURED" ? "Supabase chưa được cấu hình." : result.error);
+        const message = result.error === "SUPABASE_NOT_CONFIGURED" ? "Supabase chưa được cấu hình." : result.error;
+        setFeedback(message);
+        toast.error(message);
         return;
       }
       setTheme(values.theme);
       if (mode === "onboarding") {
+        toast.success("Đã hoàn tất thiết lập hồ sơ.");
         router.replace(result.nextPath);
         router.refresh();
       } else {
-        setFeedback("Đã lưu thay đổi.");
+        toast.success("Đã lưu thay đổi hồ sơ.");
         router.refresh();
       }
     });

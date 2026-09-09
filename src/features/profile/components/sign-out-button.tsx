@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 
@@ -12,7 +13,13 @@ export function SignOutButton() {
 
   async function signOut() {
     setIsPending(true);
-    await createClient().auth.signOut();
+    const { error } = await createClient().auth.signOut();
+    if (error) {
+      setIsPending(false);
+      toast.error("Không thể đăng xuất lúc này. Vui lòng thử lại.");
+      return;
+    }
+    toast.success("Đã đăng xuất.");
     router.replace("/login");
     router.refresh();
   }
