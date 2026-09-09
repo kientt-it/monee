@@ -17,7 +17,7 @@ export async function getAccounts() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { accounts: [] as AccountRecord[], configured: true };
-  const { data, error } = await supabase.from("accounts").select("id,name,type,current_balance,currency,color,is_archived,include_in_total").eq("user_id", user.id).eq("is_archived", false).order("created_at", { ascending: true });
+  const { data, error } = await supabase.from("accounts").select("id,name,type,current_balance,currency,color,is_archived,include_in_total").eq("user_id", user.id).order("is_archived", { ascending: true }).order("created_at", { ascending: true });
   if (error) throw new Error("Không thể tải danh sách tài khoản.");
   return { accounts: (data ?? []) as AccountRecord[], configured: true };
 }

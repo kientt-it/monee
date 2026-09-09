@@ -23,5 +23,7 @@ Tất cả bảng dữ liệu user bật RLS. Policy giới hạn theo `auth.uid
 
 Authenticated client chỉ được select transactions. Quyền insert/update/delete trực tiếp transactions và accounts đã bị revoke; metadata account chỉ update qua column grant, còn `current_balance` không thể ghi trực tiếp.
 
+Accounts edit/archive/restore dùng column grant metadata hiện có, không cần migration mới. Trước khi archive, Server Action kiểm tra không còn `recurring_transactions.is_active` tham chiếu account.
+
 ## Indexes
 Transaction theo user/date, user/type, account, category và idempotency; account/budget/goal theo user; recurring theo user/next_run_date.

@@ -7,6 +7,7 @@
 - Restore giao dịch chỉ apply lại effect khi record đang soft-deleted; delete/restore lặp lại là idempotent.
 - Client không có quyền insert/update/delete trực tiếp `transactions` hoặc cập nhật `accounts.current_balance`; các thay đổi này chỉ qua RPC bảo mật.
 - Total balance là tổng current balance của account chưa archive và `include_in_total = true`.
+- Archive account không sửa số dư hay lịch sử; account đã archive không dùng cho giao dịch mới nhưng vẫn hiện đúng tên trong giao dịch cũ. Không archive khi còn recurring transaction active.
 - Net cash flow = income − expense; saving rate = net cash flow / income × 100, bằng 0 nếu income bằng 0.
 - VND lưu BIGINT, không lưu chuỗi tiền đã format.
 - Credit card MVP giữ cùng quy ước balance hiện tại; chưa triển khai logic kỳ sao kê/lãi.

@@ -4,7 +4,7 @@
 |---|---|---|
 | Mobile dashboard | Implemented | `/app` đọc dữ liệu Supabase thật; `/` giữ preview có nhãn dữ liệu mẫu |
 | Auth + onboarding | Implemented core | Login/register/recovery, route protection, onboarding, profile, theme và sign-out; cần E2E |
-| Accounts | Partial | Danh sách, tổng số dư, form tạo tài khoản qua server action; edit/archive planned |
+| Accounts | Implemented MVP core | Create/edit/archive/restore, include-in-total, lịch sử giữ account archived; delete vĩnh viễn không hỗ trợ |
 | Transactions | Implemented MVP core | List/detail/create/edit/soft-delete; atomic RPC; 9 domain tests; filters/pagination/receipt planned |
 | Budgets | Foundation | Schema + Zod; CRUD/report planned |
 | Reports | Planned | Domain formulas đã có |
