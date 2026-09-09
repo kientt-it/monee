@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-09-09 · 0.19.1
+
+### Fixed
+- Sửa migration cleanup cron dùng exception condition hợp lệ trên Supabase PostgreSQL.
+
 ## 2026-09-09 · 0.19.0
 
 ### Changed

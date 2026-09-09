@@ -14,7 +14,7 @@ begin
       perform cron.unschedule(job.jobid);
     end loop;
   exception
-    when undefined_table or undefined_schema then
+    when undefined_table then
       null;
   end;
 end;
