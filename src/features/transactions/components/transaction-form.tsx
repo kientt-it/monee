@@ -72,7 +72,7 @@ export function TransactionForm({ accounts, categories, configured, transaction 
         toast.error(message);
         return;
       }
-      if (transaction) { toast.success("Đã cập nhật giao dịch."); router.push(`/app/transactions/${transaction.id}`); router.refresh(); return; }
+      if (transaction) { toast.success("Đã cập nhật giao dịch."); router.push(`/app/transactions/${transaction.id}`); return; }
       form.reset(); toast.success("Đã lưu giao dịch.");
     });
   }

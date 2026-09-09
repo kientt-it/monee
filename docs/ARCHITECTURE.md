@@ -14,7 +14,7 @@ Reports dùng Server Component query `/app/reports` với range an toàn từ se
 
 Goals dùng Server Component query `/app/goals` để đọc goal, contribution history và account liên kết. Metadata create/edit/status qua Server Action + Zod + RLS; contribution chỉ qua `add_saving_goal_contribution` RPC security definer có row lock, tránh race condition giữa lịch sử và cached amount.
 
-Recurring và Notifications dùng Server Components + Server Actions với auth/RLS. Recurring management lưu cấu hình và ngày chạy kế tiếp; `supabase/functions/recurring-scheduler` dùng service-role secret để gọi RPC `process_due_recurring_transactions`, còn RPC khóa record, ghi execution log, tạo transaction atomic và phát notification. Notification view đọc theo user và các action chỉ cập nhật `is_read`.
+Notifications dùng Server Components + Server Actions với auth/RLS. Notification view đọc theo user và các action chỉ cập nhật `is_read`. Recurring đã được gỡ khỏi UI và scheduler; URL cũ chuyển về `/app`.
 
 Next Proxy refresh session, bảo vệ route và enforce onboarding theo `profiles.onboarding_completed`. Profile được đọc qua request-scoped React cache; update đi qua Server Action với Zod và RLS. `next-themes` áp dụng preference đã lưu bằng `data-theme`.
 

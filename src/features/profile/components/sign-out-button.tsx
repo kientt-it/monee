@@ -21,7 +21,6 @@ export function SignOutButton() {
     }
     toast.success("Đã đăng xuất.");
     router.replace("/login");
-    router.refresh();
   }
 
   return <Button type="button" variant="outline" className="w-full text-[var(--danger)]" onClick={signOut} disabled={isPending}><LogOut size={17} />{isPending ? "Đang đăng xuất…" : "Đăng xuất"}</Button>;

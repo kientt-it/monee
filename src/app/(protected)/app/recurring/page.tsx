@@ -1,7 +1,5 @@
-import { RecurringView } from "@/features/recurring/components/recurring-view";
-import { getRecurringTransactions } from "@/features/recurring/queries/get-recurring";
+import { redirect } from "next/navigation";
 
-export default async function RecurringPage() {
-  const result = await getRecurringTransactions();
-  return <RecurringView recurring={result.recurring} accounts={result.accounts} categories={result.categories} configured={result.configured} />;
+export default function RecurringPage() {
+  redirect("/app");
 }

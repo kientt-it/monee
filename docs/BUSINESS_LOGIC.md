@@ -7,7 +7,7 @@
 - Restore giao dịch chỉ apply lại effect khi record đang soft-deleted; delete/restore lặp lại là idempotent.
 - Client không có quyền insert/update/delete trực tiếp `transactions` hoặc cập nhật `accounts.current_balance`; các thay đổi này chỉ qua RPC bảo mật.
 - Total balance là tổng current balance của account chưa archive và `include_in_total = true`.
-- Archive account không sửa số dư hay lịch sử; account đã archive không dùng cho giao dịch mới nhưng vẫn hiện đúng tên trong giao dịch cũ. Không archive khi còn recurring transaction active.
+- Archive account không sửa số dư hay lịch sử; account đã archive không dùng cho giao dịch mới nhưng vẫn hiện đúng tên trong giao dịch cũ.
 - Net cash flow = income − expense; saving rate = net cash flow / income × 100, bằng 0 nếu income bằng 0.
 - VND lưu BIGINT, không lưu chuỗi tiền đã format.
 - Credit card MVP giữ cùng quy ước balance hiện tại; chưa triển khai logic kỳ sao kê/lãi.
@@ -17,7 +17,4 @@
 - Tắt budget chỉ đổi `is_active` để giữ lịch sử; không xóa dữ liệu kế hoạch đã tạo.
 - Goal lưu `target_amount` dương và `current_amount` không âm; progress không vượt quá 100% khi hiển thị.
 - Contribution lưu amount dương trong lịch sử và cập nhật `saving_goals.current_amount` trong cùng một RPC có row lock. Khi đạt target, goal tự chuyển sang `completed`; không sửa tay current amount sau khi tạo.
-- Recurring record chỉ mô tả lịch; không làm thay đổi balance cho tới khi scheduler thực thi qua flow atomic. Mỗi ngày chạy có tối đa một execution log nhờ unique key.
-- Tắt recurring chỉ đổi `is_active`; giữ lại cấu hình, execution log và lịch sử giao dịch đã tạo.
 - Notification chỉ hiển thị dữ liệu user sở hữu; mark read không thay đổi dữ liệu tài chính.
-- Scheduler chỉ xử lý recurring active đã đến `next_run_date`, tạo transaction ở ngày lịch với idempotency key riêng, cập nhật `next_run_date` và tự tắt sau `end_date`. Lỗi được ghi execution log failed và notification để người dùng kiểm tra.

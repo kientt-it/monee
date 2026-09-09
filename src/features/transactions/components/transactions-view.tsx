@@ -43,7 +43,6 @@ function UndoBanner({ deletedId }: { deletedId: string }) {
       }
       toast.success("Đã khôi phục giao dịch.");
       router.replace("/app/transactions");
-      router.refresh();
     });
   }
 

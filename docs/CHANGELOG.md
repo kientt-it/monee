@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-09-09 · 0.19.0
+
+### Changed
+- Gỡ mục Định kỳ khỏi giao diện và chuyển URL cũ `/app/recurring` về Tổng quan.
+- Gỡ Edge Function và RPC scheduler; migration mới dừng các cron job scheduler đã tạo nhưng giữ dữ liệu lịch sử.
+- Tăng tốc chuyển tab bằng prefetch theo ý định chạm/hover và bỏ các lần refresh dư sau điều hướng.
+
 ## 2026-09-09 · 0.18.0
 
 ### Changed

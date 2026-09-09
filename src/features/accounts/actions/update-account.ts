@@ -57,16 +57,6 @@ export async function archiveAccountAction(id: string) {
   } = await supabase.auth.getUser();
   if (!user) return { ok: false as const, error: "Bạn cần đăng nhập để lưu trữ tài khoản." };
 
-  const { data: recurring, error: recurringError } = await supabase
-    .from("recurring_transactions")
-    .select("id")
-    .eq("user_id", user.id)
-    .eq("is_active", true)
-    .or(`account_id.eq.${parsed.data},destination_account_id.eq.${parsed.data}`)
-    .limit(1);
-  if (recurringError) return { ok: false as const, error: "Không thể kiểm tra giao dịch định kỳ." };
-  if ((recurring ?? []).length > 0) return { ok: false as const, error: "Hãy tắt giao dịch định kỳ của tài khoản trước khi lưu trữ." };
-
   const { data, error } = await supabase
     .from("accounts")
     .update({ is_archived: true })

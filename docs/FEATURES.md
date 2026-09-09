@@ -10,6 +10,5 @@
 | Budgets | Implemented MVP core | `/app/budgets`: create/edit, category/all spending, weekly/monthly/yearly/custom periods, current-period progress, warning threshold, active/inactive history |
 | Reports | Implemented MVP core | `/app/reports`: week/month/year/custom, summary thu-chi-ròng-saving rate, top categories và trend chart |
 | Saving goals | Implemented MVP core | `/app/goals`: create/edit, target date/account, progress, pause/resume và contribution history qua atomic RPC |
-| Recurring | Implemented MVP | `/app/recurring`: create/edit, frequency, next run date, active/inactive; Edge Function scheduler + execution log |
-| Notifications | Implemented core | `/app/notifications`: list, unread state, mark one/all read; recurring scheduler emits run notifications |
+| Notifications | Implemented core | `/app/notifications`: list, unread state, mark one/all read |
 | PWA | Partial | Manifest, icon, service worker shell |

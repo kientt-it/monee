@@ -16,4 +16,4 @@ Server Actions cho CRUD sẽ validate bằng Zod, gọi service/domain layer, ma
 
 `deleteTransactionAction(id)` — authenticated; gọi `soft_delete_financial_transaction`, reverse balance effect và set `deleted_at`. `restoreTransactionAction(id)` gọi RPC restore tương ứng.
 
-`process_due_recurring_transactions(p_limit)` — service-role only; xử lý lịch đã đến hạn, ghi execution log, gọi scheduled transaction helper atomic, cập nhật `next_run_date` và tạo notification. Edge Function `supabase/functions/recurring-scheduler` bảo vệ endpoint bằng `x-scheduler-secret`.
+Không còn API/action cho recurring; migration cleanup dừng cron scheduler và gỡ các RPC service-role không còn sử dụng.

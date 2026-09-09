@@ -47,7 +47,6 @@ export function ProfileForm({ profile, email, mode = "profile" }: { profile: Pro
       if (mode === "onboarding") {
         toast.success("Đã hoàn tất thiết lập hồ sơ.");
         router.replace(result.nextPath);
-        router.refresh();
       } else {
         toast.success("Đã lưu thay đổi hồ sơ.");
         router.refresh();

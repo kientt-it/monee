@@ -25,7 +25,6 @@ export default function ResetPasswordPage() {
     await supabase.auth.signOut();
     toast.success("Đã cập nhật mật khẩu.");
     router.replace("/login");
-    router.refresh();
   }
 
   return <Card className="p-6 shadow-[var(--shadow)] sm:p-8"><div className="mb-7"><h1 className="text-2xl font-bold">Tạo mật khẩu mới</h1><p className="mt-2 text-sm text-[var(--muted)]">Chọn mật khẩu mới có ít nhất 8 ký tự.</p></div><form onSubmit={submit} className="space-y-4"><label className="block text-sm font-semibold">Mật khẩu mới<input required minLength={8} type="password" autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} className="mt-2 min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-base" /></label><label className="block text-sm font-semibold">Nhập lại mật khẩu<input required minLength={8} type="password" autoComplete="new-password" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} className="mt-2 min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-base" /></label><Button type="submit" className="w-full" disabled={loading}>{loading ? "Đang cập nhật…" : "Lưu mật khẩu mới"}</Button></form></Card>;
