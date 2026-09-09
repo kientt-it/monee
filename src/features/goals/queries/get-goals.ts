@@ -1,5 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
-import { getSupabaseConfig } from "@/lib/supabase/env";
+import { getSupabaseAuthContext } from "@/lib/supabase/auth-context";
 
 type GoalRow = { id: string; name: string; target_amount: number | string; current_amount: number | string; target_date: string | null; icon: string | null; color: string | null; account_id: string | null; status: "active" | "completed" | "paused" | "cancelled"; created_at: string };
 type ContributionRow = { id: string; saving_goal_id: string; amount: number | string; contribution_date: string; note: string | null };
@@ -12,10 +11,9 @@ export type GoalAccountOption = { id: string; name: string };
 function safeAmount(value: number | string) { const amount = Number(value); if (!Number.isSafeInteger(amount) || amount < 0) throw new Error("Số tiền vượt quá giới hạn hiển thị an toàn."); return amount; }
 
 export async function getGoals() {
-  if (!getSupabaseConfig().configured) return { goals: [] as SavingGoalRecord[], accounts: [] as GoalAccountOption[], configured: false };
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { goals: [] as SavingGoalRecord[], accounts: [] as GoalAccountOption[], configured: true };
+  const { configured, supabase, user } = await getSupabaseAuthContext();
+  if (!configured) return { goals: [] as SavingGoalRecord[], accounts: [] as GoalAccountOption[], configured: false };
+  if (!supabase || !user) return { goals: [] as SavingGoalRecord[], accounts: [] as GoalAccountOption[], configured: true };
   const [{ data: goalRows, error: goalsError }, { data: contributionRows, error: contributionsError }, { data: accountRows, error: accountsError }] = await Promise.all([
     supabase.from("saving_goals").select("id,name,target_amount,current_amount,target_date,icon,color,account_id,status,created_at").eq("user_id", user.id).order("status").order("created_at", { ascending: true }),
     supabase.from("saving_goal_contributions").select("id,saving_goal_id,amount,contribution_date,note").eq("user_id", user.id).order("contribution_date", { ascending: false }),

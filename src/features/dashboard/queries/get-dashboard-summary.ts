@@ -5,8 +5,8 @@ import {
   calculateSavingRate,
   calculateTotalBalance,
 } from "@/lib/domain/finance/calculations";
-import { getSupabaseConfig } from "@/lib/supabase/env";
-import { createClient } from "@/lib/supabase/server";
+import { getSupabaseAuthContext } from "@/lib/supabase/auth-context";
+import { getCurrentProfile } from "@/features/profile/queries/get-current-profile";
 import type { DashboardSummary } from "@/features/dashboard/types";
 
 const TIMEZONE = "Asia/Ho_Chi_Minh";
@@ -94,20 +94,15 @@ function formatTransactionDate(value: string) {
 }
 
 export async function getDashboardSummary(): Promise<DashboardSummary> {
-  if (!getSupabaseConfig().configured) redirect("/login");
-
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  const { configured, supabase, user } = await getSupabaseAuthContext();
+  if (!configured || !supabase || !user) redirect("/login");
+  const { profile } = await getCurrentProfile();
 
   const now = new Date();
   const month = getMonthWindow(now);
-  const [profileResult, accountsResult, monthTransactionsResult, recentTransactionsResult, categoriesResult, budgetsResult, goalsResult, notificationResult] = await Promise.all([
-    supabase.from("profiles").select("full_name,currency").eq("id", user.id).maybeSingle(),
+  const [accountsResult, monthTransactionsResult, recentTransactionsResult, categoriesResult, budgetsResult, goalsResult, notificationResult] = await Promise.all([
     supabase.from("accounts").select("id,name,current_balance,is_archived,include_in_total").eq("user_id", user.id),
-    supabase.from("transactions").select("id,type,amount,merchant,note,transaction_date,account_id,destination_account_id,category_id").eq("user_id", user.id).is("deleted_at", null).gte("transaction_date", month.start).lt("transaction_date", month.end).order("transaction_date", { ascending: false }),
+    supabase.from("transactions").select("type,amount,transaction_date,category_id").eq("user_id", user.id).is("deleted_at", null).gte("transaction_date", month.start).lt("transaction_date", month.end).order("transaction_date", { ascending: false }),
     supabase.from("transactions").select("id,type,amount,merchant,note,transaction_date,account_id,destination_account_id,category_id").eq("user_id", user.id).is("deleted_at", null).order("transaction_date", { ascending: false }).limit(5),
     supabase.from("categories").select("id,name,color").or(`user_id.is.null,user_id.eq.${user.id}`).eq("is_archived", false),
     supabase.from("budgets").select("amount,category_id").eq("user_id", user.id).eq("is_active", true).eq("period", "monthly").lte("start_date", month.lastDate).or(`end_date.is.null,end_date.gte.${month.firstDate}`),
@@ -115,7 +110,7 @@ export async function getDashboardSummary(): Promise<DashboardSummary> {
     supabase.from("notifications").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("is_read", false),
   ]);
 
-  const error = [profileResult.error, accountsResult.error, monthTransactionsResult.error, recentTransactionsResult.error, categoriesResult.error, budgetsResult.error, goalsResult.error, notificationResult.error].find(Boolean);
+  const error = [accountsResult.error, monthTransactionsResult.error, recentTransactionsResult.error, categoriesResult.error, budgetsResult.error, goalsResult.error, notificationResult.error].find(Boolean);
   if (error) throw new Error("Không thể tải tổng quan tài chính lúc này.");
 
   const accounts = (accountsResult.data ?? []) as AccountRow[];
@@ -162,14 +157,14 @@ export async function getDashboardSummary(): Promise<DashboardSummary> {
     .reduce((total, transaction) => total + toSafeAmount(transaction.amount), 0);
   const budgetUsage = budgetAmount > 0 ? calculateBudgetUsage(budgetSpent, budgetAmount) : null;
 
-  const fullName = profileResult.data?.full_name?.trim();
-  const greetingName = fullName?.split(/\s+/).at(-1) ?? user.email?.split("@")[0] ?? "bạn";
+  const fullName = profile.fullName.trim();
+  const greetingName = fullName.split(/\s+/).filter(Boolean).at(-1) ?? user.email?.split("@")[0] ?? "bạn";
 
   return {
     greetingName,
     dateLabel: formatDateLabel(now),
     monthLabel: formatMonthLabel(now),
-    currency: profileResult.data?.currency ?? "VND",
+    currency: profile.currency,
     totalBalance: calculateTotalBalance(accounts.map((account) => ({ currentBalance: toSafeAmount(account.current_balance), isArchived: account.is_archived, includeInTotal: account.include_in_total }))),
     monthlyIncome,
     monthlyExpense,

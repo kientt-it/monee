@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-09-09 · 0.15.0
+
+### Performance
+- Tắt prefetch tự động cho menu điều hướng để không tải ngầm toàn bộ màn hình tài chính ngay khi mở app.
+- Dùng chung ngữ cảnh xác thực Supabase trong một lần render server, tránh gọi xác thực lặp giữa layout và page.
+- Giảm dữ liệu transaction không cần thiết khi tổng hợp Dashboard.
+- Thêm loading skeleton để màn hình phản hồi ngay trong lúc dữ liệu đang tải.
+
 ## 2026-09-09 · 0.14.0
 
 ### Added

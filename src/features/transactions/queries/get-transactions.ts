@@ -1,5 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
-import { getSupabaseConfig } from "@/lib/supabase/env";
+import { getSupabaseAuthContext } from "@/lib/supabase/auth-context";
 
 export type TransactionRecord = { id: string; type: "expense" | "income" | "transfer"; amount: number; merchant: string | null; note: string | null; transaction_date: string; account_id: string; destination_account_id: string | null; category_id: string | null };
 
@@ -16,9 +15,9 @@ function getVietnamMonthBounds() {
 }
 
 export async function getTransactions(filters: TransactionFilters = {}) {
-  if (!getSupabaseConfig().configured) return { transactions: [] as TransactionRecord[], configured: false };
-  const supabase = await createClient(); const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { transactions: [] as TransactionRecord[], configured: true };
+  const { configured, supabase, user } = await getSupabaseAuthContext();
+  if (!configured) return { transactions: [] as TransactionRecord[], configured: false };
+  if (!supabase || !user) return { transactions: [] as TransactionRecord[], configured: true };
   const page = Math.max(1, filters.page ?? 1);
   let query = supabase.from("transactions").select("id,type,amount,merchant,note,transaction_date,account_id,destination_account_id,category_id").eq("user_id", user.id).is("deleted_at", null);
   if (filters.type) query = query.eq("type", filters.type);
@@ -33,9 +32,9 @@ export async function getTransactions(filters: TransactionFilters = {}) {
 }
 
 export async function getTransaction(id: string) {
-  if (!getSupabaseConfig().configured) return { transaction: null as TransactionRecord | null, configured: false };
-  const supabase = await createClient(); const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { transaction: null as TransactionRecord | null, configured: true };
+  const { configured, supabase, user } = await getSupabaseAuthContext();
+  if (!configured) return { transaction: null as TransactionRecord | null, configured: false };
+  if (!supabase || !user) return { transaction: null as TransactionRecord | null, configured: true };
   const { data, error } = await supabase.from("transactions").select("id,type,amount,merchant,note,transaction_date,account_id,destination_account_id,category_id").eq("id", id).eq("user_id", user.id).is("deleted_at", null).maybeSingle();
   if (error) throw new Error("Không thể tải giao dịch.");
   return { transaction: data as TransactionRecord | null, configured: true };

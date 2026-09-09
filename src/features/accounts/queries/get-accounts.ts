@@ -1,5 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
-import { getSupabaseConfig } from "@/lib/supabase/env";
+import { getSupabaseAuthContext } from "@/lib/supabase/auth-context";
 
 export type AccountRecord = {
   id: string;
@@ -13,10 +12,9 @@ export type AccountRecord = {
 };
 
 export async function getAccounts() {
-  if (!getSupabaseConfig().configured) return { accounts: [] as AccountRecord[], configured: false };
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { accounts: [] as AccountRecord[], configured: true };
+  const { configured, supabase, user } = await getSupabaseAuthContext();
+  if (!configured) return { accounts: [] as AccountRecord[], configured: false };
+  if (!supabase || !user) return { accounts: [] as AccountRecord[], configured: true };
   const { data, error } = await supabase.from("accounts").select("id,name,type,current_balance,currency,color,is_archived,include_in_total").eq("user_id", user.id).order("is_archived", { ascending: true }).order("created_at", { ascending: true });
   if (error) throw new Error("Không thể tải danh sách tài khoản.");
   return { accounts: (data ?? []) as AccountRecord[], configured: true };

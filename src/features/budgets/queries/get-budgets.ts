@@ -1,5 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
-import { getSupabaseConfig } from "@/lib/supabase/env";
+import { getSupabaseAuthContext } from "@/lib/supabase/auth-context";
 import { calculateBudgetUsage, type BudgetStatus } from "@/lib/domain/finance/calculations";
 
 const TIMEZONE = "Asia/Ho_Chi_Minh";
@@ -105,10 +104,9 @@ function safeAmount(value: number | string) {
 }
 
 export async function getBudgets() {
-  if (!getSupabaseConfig().configured) return { budgets: [] as BudgetRecord[], categories: [] as BudgetCategoryOption[], configured: false };
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { budgets: [] as BudgetRecord[], categories: [] as BudgetCategoryOption[], configured: true };
+  const { configured, supabase, user } = await getSupabaseAuthContext();
+  if (!configured) return { budgets: [] as BudgetRecord[], categories: [] as BudgetCategoryOption[], configured: false };
+  if (!supabase || !user) return { budgets: [] as BudgetRecord[], categories: [] as BudgetCategoryOption[], configured: true };
 
   const [{ data: budgetRows, error: budgetsError }, { data: categoryRows, error: categoriesError }] = await Promise.all([
     supabase.from("budgets").select("id,name,category_id,amount,period,start_date,end_date,alert_threshold,is_active,created_at").eq("user_id", user.id).order("is_active", { ascending: false }).order("created_at", { ascending: false }),

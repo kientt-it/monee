@@ -1,5 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
-import { getSupabaseConfig } from "@/lib/supabase/env";
+import { getSupabaseAuthContext } from "@/lib/supabase/auth-context";
 import { calculateNetCashFlow, calculateSavingRate } from "@/lib/domain/finance/calculations";
 import { TIMEZONE, addDays, addMonths, addYears, currentWeekStart, getReportPeriod, utcDate, type ReportRange, type ReportUnit } from "@/features/reports/queries/report-period";
 
@@ -76,10 +75,8 @@ function buildTrend(transactions: TransactionRow[], trendFrom: string, period: R
 }
 
 export async function getReport(range: ReportRange = "month", customFrom?: string, customTo?: string): Promise<ReportData | null> {
-  if (!getSupabaseConfig().configured) return null;
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
+  const { configured, supabase, user } = await getSupabaseAuthContext();
+  if (!configured || !supabase || !user) return null;
   const period = getReportPeriod(range, new Date(), customFrom, customTo);
   const trend = getTrendPeriod(period);
   const [{ data: transactionRows, error: transactionsError }, { data: categoryRows, error: categoriesError }] = await Promise.all([

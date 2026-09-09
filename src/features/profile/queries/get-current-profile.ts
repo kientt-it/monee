@@ -1,7 +1,6 @@
 import { cache } from "react";
 import { redirect } from "next/navigation";
-import { getSupabaseConfig } from "@/lib/supabase/env";
-import { createClient } from "@/lib/supabase/server";
+import { getSupabaseAuthContext } from "@/lib/supabase/auth-context";
 
 export type ProfileRecord = {
   fullName: string;
@@ -22,15 +21,11 @@ const defaultProfile: ProfileRecord = {
 };
 
 export const getCurrentProfile = cache(async () => {
-  if (!getSupabaseConfig().configured) {
+  const { configured, supabase, user } = await getSupabaseAuthContext();
+  if (!configured) {
     return { profile: defaultProfile, email: null, configured: false };
   }
-
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  if (!supabase || !user) redirect("/login");
 
   const { data, error } = await supabase
     .from("profiles")
