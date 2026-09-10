@@ -2,12 +2,13 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Archive, ArchiveRestore, Building2, CreditCard, Eye, EyeOff, Landmark, Pencil, Plus, WalletCards, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { MoneyInput } from "@/components/ui/money-input";
 import { createAccountAction } from "@/features/accounts/actions/create-account";
 import { archiveAccountAction, restoreAccountAction, updateAccountAction } from "@/features/accounts/actions/update-account";
 import { accountMetadataSchema, accountSchema, type AccountInput, type AccountMetadataInput } from "@/features/accounts/schemas/account.schema";
@@ -179,7 +180,7 @@ export function AccountsView({ accounts, configured }: { accounts: AccountRecord
             <form onSubmit={createForm.handleSubmit(submitCreate)} className="space-y-4">
               <label className="block text-sm font-semibold">Tên tài khoản<input {...createForm.register("name")} autoFocus className="mt-2 min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-base" placeholder="Ví dụ: Techcombank" />{createForm.formState.errors.name && <span className="mt-1 block text-xs text-[var(--danger)]">{createForm.formState.errors.name.message}</span>}</label>
               <div className="grid grid-cols-[1fr_72px] gap-3"><label className="block text-sm font-semibold">Loại tài khoản<select {...createForm.register("type")} className="mt-2 min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-base">{Object.entries(typeLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label><label className="block text-sm font-semibold">Màu<input {...createForm.register("color")} type="color" className="mt-2 h-11 w-full cursor-pointer rounded-xl border border-[var(--border)] bg-[var(--surface)] p-1" /></label></div>
-              <label className="block text-sm font-semibold">Số dư ban đầu<input {...createForm.register("initialBalance", { valueAsNumber: true })} type="number" min="0" step="1" inputMode="numeric" className="mt-2 min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-base" placeholder="0" />{createForm.formState.errors.initialBalance && <span className="mt-1 block text-xs text-[var(--danger)]">{createForm.formState.errors.initialBalance.message}</span>}</label>
+              <label className="block text-sm font-semibold">Số dư ban đầu<Controller control={createForm.control} name="initialBalance" render={({ field }) => <MoneyInput name={field.name} ref={field.ref} value={field.value} onValueChange={field.onChange} onBlur={field.onBlur} min={0} placeholder="0" aria-label="Số dư ban đầu" />} />{createForm.formState.errors.initialBalance && <span className="mt-1 block text-xs text-[var(--danger)]">{createForm.formState.errors.initialBalance.message}</span>}</label>
               <label className="flex cursor-pointer items-start gap-3 rounded-xl bg-[var(--surface-muted)] p-3 text-sm"><input {...createForm.register("includeInTotal")} type="checkbox" className="mt-1 h-4 w-4 accent-[var(--brand)]" /><span><strong className="block">Tính vào tổng tài sản</strong><span className="mt-0.5 block text-xs text-[var(--muted)]">Có thể thay đổi sau mà không ảnh hưởng số dư.</span></span></label>
               <Button type="submit" className="w-full" disabled={isPending}>{isPending ? "Đang lưu…" : "Lưu tài khoản"}</Button>
             </form>

@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-09-10 · 0.20.1
+
+### Fixed
+- Các ô nhập tiền ở Tài khoản, Mục tiêu, Đóng góp và Khoản vay tự thêm dấu chấm phân cách theo định dạng Việt Nam khi gõ; dữ liệu gửi đi vẫn là số nguyên.
+- Thêm nút nổi “Thêm khoản vay” ở góc phải phía dưới trên mobile để mở form ngay tại vị trí đang xem.
+
 ## 2026-09-10 · 0.20.0
 
 ### Changed

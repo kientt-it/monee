@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Archive, Check, ChevronLeft, ChevronRight, HandCoins, Pencil, Plus, RotateCcw, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { DateInput } from "@/components/ui/date-input";
+import { MoneyInput } from "@/components/ui/money-input";
 import { displayDate } from "@/lib/date";
 import { formatCurrency } from "@/lib/utils";
 import { saveLoanAction, setLoanArchivedAction, setLoanPaymentAction } from "../actions/save-loan";
@@ -26,6 +27,7 @@ function LoanEditor({ editor, today, onClose }: { editor: Editor; today: string;
     resolver: zodResolver(loanSchema),
     defaultValues: editor.loan ?? { name: "", lender: "", monthlyAmount: 0, firstDueDate: today, installmentCount: 12, note: "" },
   });
+  const monthlyAmount = useWatch({ control: form.control, name: "monthlyAmount" });
   useEffect(() => {
     dialog.current?.showModal();
     const previous = document.body.style.overflow;
@@ -50,7 +52,7 @@ function LoanEditor({ editor, today, onClose }: { editor: Editor; today: string;
     <form onSubmit={form.handleSubmit(submit)}><fieldset disabled={pending} className="min-w-0 space-y-4 disabled:opacity-70">
       <label className="block text-sm font-semibold">Tên khoản vay<input {...form.register("name")} required autoFocus maxLength={80} placeholder="Ví dụ: Trả góp xe máy" className={inputClass} />{error("name")}</label>
       <label className="block text-sm font-semibold">Bên cho vay <span className="font-normal text-[var(--muted)]">(không bắt buộc)</span><input {...form.register("lender")} maxLength={120} placeholder="Ngân hàng hoặc người cho vay" className={inputClass} />{error("lender")}</label>
-      <label className="block text-sm font-semibold">Số tiền đóng mỗi tháng (đ)<input {...form.register("monthlyAmount", { valueAsNumber: true })} required type="number" inputMode="numeric" min={1} max={1_000_000_000_000} step={1} readOnly={locked} className={inputClass} />{error("monthlyAmount")}</label>
+      <label className="block text-sm font-semibold">Số tiền đóng mỗi tháng (đ)<MoneyInput name="monthlyAmount" value={monthlyAmount} onValueChange={(value) => form.setValue("monthlyAmount", value ?? 0, { shouldValidate: true })} onBlur={() => form.trigger("monthlyAmount")} required min={1} max={1_000_000_000_000} readOnly={locked} className={inputClass.replace("mt-2 ", "")} placeholder="0" aria-label="Số tiền đóng mỗi tháng" />{error("monthlyAmount")}</label>
       <div className="grid min-w-0 gap-4 sm:grid-cols-2"><label className="block min-w-0 text-sm font-semibold">Ngày đóng kỳ đầu<DateInput {...form.register("firstDueDate")} required min="1900-01-01" max="2100-12-31" readOnly={locked} className="mt-2" />{error("firstDueDate")}</label><label className="block min-w-0 text-sm font-semibold">Số tháng cần đóng<input {...form.register("installmentCount", { valueAsNumber: true })} required type="number" inputMode="numeric" min={1} max={600} step={1} readOnly={locked} className={inputClass} />{error("installmentCount")}</label></div>
       <p className="text-sm leading-6 text-[var(--muted)]">{locked ? "Đã có lịch sử đóng tiền nên số tiền và lịch đóng được giữ cố định." : "Nhập số tiền gồm cả gốc và lãi của mỗi kỳ. Nếu đang trả dở, chọn kỳ tiếp theo và số tháng còn lại. Ngày 29–31 sẽ chuyển về ngày cuối tháng khi cần."}</p>
       <label className="block text-sm font-semibold">Ghi chú<textarea {...form.register("note")} rows={2} maxLength={500} className={`${inputClass} resize-y`} placeholder="Thông tin cần nhớ" />{error("note")}</label>
@@ -118,6 +120,7 @@ export function LoansView({ loans, available, today }: { loans: LoanRecord[]; av
       <section className="mt-6" aria-label="Danh sách khoản vay">{active.length ? <div className="grid gap-4 lg:grid-cols-2">{active.map(renderLoan)}</div> : <Card className="p-7 text-center"><HandCoins size={32} className="mx-auto text-[var(--brand)]" /><h2 className="mt-3 font-semibold">Chưa có khoản vay đang theo dõi</h2><p className="mt-2 text-sm text-[var(--muted)]">Thêm khoản vay để biết mỗi tháng cần đóng bao nhiêu.</p><Button onClick={create} className="mt-5"><Plus size={17} /> Thêm khoản vay</Button></Card>}</section>
       {archived.length > 0 && <details className="mt-7"><summary className="min-h-11 cursor-pointer text-base font-semibold">Đã lưu trữ ({archived.length})</summary><div className="mt-3 grid gap-4 lg:grid-cols-2">{archived.map(renderLoan)}</div></details>}
     </>}
+    {available && <Button type="button" aria-label="Thêm khoản vay" disabled={pending} onClick={create} className="fixed bottom-[calc(env(safe-area-inset-bottom)+5.5rem)] right-4 z-20 h-14 w-14 rounded-full border-4 border-[var(--background)] p-0 shadow-xl md:hidden"><Plus size={24} /></Button>}
     {editor && <LoanEditor key={editor.id} editor={editor} today={today} onClose={() => setEditor(null)} />}
   </div></main>;
 }

@@ -3,6 +3,8 @@
 ## Scope
 - Fix the transaction date field on mobile: a separate flex icon track, native date picker, WebKit date-content sizing, 44px minimum height, 16px input text, and bottom-navigation clearance.
 - Use the Vietnamese calendar date for new transactions.
+- All monetary entry fields in accounts, goals, contributions, and loans format grouped digits with Vietnamese separators while preserving numeric payloads.
+- On mobile, keep a bottom-right floating “Thêm khoản vay” button above the bottom navigation so users can add a loan without returning to the top.
 - Replace Budgets with Loans across desktop navigation, mobile More menu, dashboard, and route entry. The old budget route redirects; historical budget tables/data remain intact.
 
 ## Repayment rules
