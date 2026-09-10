@@ -30,12 +30,6 @@ function buildSpendingGradient(spending: DashboardSummary["spending"]) {
   return `conic-gradient(${segments.join(", ")})`;
 }
 
-function budgetBarColor(status: NonNullable<DashboardSummary["budget"]>["status"]) {
-  if (status === "over" || status === "strong_warning") return "var(--danger)";
-  if (status === "warning") return "var(--warning)";
-  return "var(--brand)";
-}
-
 export function DashboardView({ data }: { data: DashboardSummary }) {
   const dashboard = data;
   const href = (path: string) => path;
@@ -82,19 +76,19 @@ export function DashboardView({ data }: { data: DashboardSummary }) {
                 <p className={`mt-1 text-lg font-bold tabular-nums ${dashboard.savingRate < 0 ? "text-[var(--danger)]" : ""}`}>{savingRate}%</p>
               </Card>
               <Card className="col-span-2 p-4 md:col-span-2">
-                {dashboard.budget ? (
+                {dashboard.loans && dashboard.loans.activeCount > 0 ? (
                   <>
                     <div className="flex items-center justify-between gap-4">
-                      <div><p className="text-xs text-[var(--muted)]">Ngân sách tháng</p><p className="mt-1 text-lg font-bold tabular-nums">{formatCurrency(dashboard.budget.spent, dashboard.currency)} <span className="text-sm font-medium text-[var(--muted)]">/ {formatCurrency(dashboard.budget.amount, dashboard.currency)}</span></p></div>
-                      <span className="text-sm font-bold" style={{ color: budgetBarColor(dashboard.budget.status) }}>{Math.round(dashboard.budget.percentage)}%</span>
+                      <div><p className="text-sm text-[var(--muted)]">Khoản vay · Còn đóng tháng này</p><p className="mt-1 text-lg font-bold tabular-nums">{formatCurrency(dashboard.loans.remaining)}</p></div>
+                      <Link href="/app/loans" className="shrink-0 text-sm font-semibold text-[var(--brand)]">Xem lịch</Link>
                     </div>
-                    <div className="mt-4 h-2 overflow-hidden rounded-full bg-[var(--surface-muted)]"><div className="h-full rounded-full" style={{ width: `${Math.min(dashboard.budget.percentage, 100)}%`, background: budgetBarColor(dashboard.budget.status) }} /></div>
-                    <p className="mt-2 text-xs text-[var(--muted)]">Còn lại {formatCurrency(dashboard.budget.remaining, dashboard.currency)} trong tháng</p>
+                    <p className="mt-3 text-sm text-[var(--muted)]">Đã đóng {formatCurrency(dashboard.loans.paid)} / {formatCurrency(dashboard.loans.total)}</p>
+                    {dashboard.loans.overdue > 0 && <p className="mt-2 text-sm text-[var(--danger)]">Quá hạn chưa đóng: {formatCurrency(dashboard.loans.overdue)}</p>}
                   </>
                 ) : (
                   <div className="flex h-full items-center justify-between gap-4">
-                    <div><p className="text-xs text-[var(--muted)]">Ngân sách tháng</p><p className="mt-1 font-semibold">Chưa có ngân sách đang hoạt động</p></div>
-                    <Link href={href("/app/budgets")} className="shrink-0 text-sm font-semibold text-[var(--brand)]">Thiết lập</Link>
+                    <div><p className="text-sm text-[var(--muted)]">Khoản vay</p><p className="mt-1 font-semibold">{dashboard.loans ? "Chưa có khoản vay đang theo dõi" : "Đang chờ cập nhật"}</p></div>
+                    <Link href="/app/loans" className="shrink-0 text-sm font-semibold text-[var(--brand)]">Xem lịch</Link>
                   </div>
                 )}
               </Card>

@@ -1,4 +1,4 @@
-import type { BudgetStatus } from "@/lib/domain/finance/calculations";
+import type { LoanSummary } from "@/features/loans/types";
 
 export type DashboardSpendingCategory = {
   label: string;
@@ -25,14 +25,6 @@ export type DashboardGoal = {
   icon: string;
 };
 
-export type DashboardBudget = {
-  amount: number;
-  spent: number;
-  remaining: number;
-  percentage: number;
-  status: BudgetStatus;
-};
-
 export type DashboardSummary = {
   greetingName: string;
   dateLabel: string;
@@ -43,7 +35,7 @@ export type DashboardSummary = {
   monthlyExpense: number;
   netCashFlow: number;
   savingRate: number;
-  budget: DashboardBudget | null;
+  loans: LoanSummary | null;
   spending: DashboardSpendingCategory[];
   recentTransactions: DashboardTransaction[];
   goals: DashboardGoal[];

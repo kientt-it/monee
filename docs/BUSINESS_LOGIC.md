@@ -12,9 +12,11 @@
 - VND lưu BIGINT, không lưu chuỗi tiền đã format.
 - Credit card MVP giữ cùng quy ước balance hiện tại; chưa triển khai logic kỳ sao kê/lãi.
 - Saving goal có contribution history; cached current_amount phải đồng bộ với contributions.
-- Budget amount lưu số dương; budget theo danh mục chỉ tính expense đúng category, budget không chọn danh mục tính mọi expense trong kỳ.
-- Progress budget dùng kỳ weekly/monthly/yearly/custom, chỉ tính giao dịch chưa soft-delete trong cửa sổ hiện tại; trạng thái hiển thị là normal dưới 75%, warning từ 75%, strong warning từ 90% và over từ 100%.
-- Tắt budget chỉ đổi `is_active` để giữ lịch sử; không xóa dữ liệu kế hoạch đã tạo.
+- Khoản vay theo dõi số tiền cố định mỗi tháng (gồm gốc và lãi do user nhập), ngày đóng đầu tiên và số kỳ. Không tự tính lãi hoặc tự trừ tiền.
+- Ngày đến hạn 29–31 được kẹp về ngày cuối tháng khi cần; tháng kế tiếp vẫn dựa trên ngày gốc. Quá hạn là ngày trước hôm nay theo Việt Nam và chưa có ghi nhận đã đóng.
+- Ghi nhận/hoàn tác một kỳ là idempotent theo loan/period; không tạo transaction hay ảnh hưởng balance. Lịch và số tiền bị khóa khi đã có payment; tên/bên cho vay/ghi chú vẫn sửa được.
+- Lưu trữ khoản vay giữ lịch sử, loại khỏi tổng cần đóng và tổng quá hạn; có thể khôi phục.
+- Dữ liệu budgets cũ chỉ giữ lịch sử trong database, không còn được app đọc/ghi.
 - Goal lưu `target_amount` dương và `current_amount` không âm; progress không vượt quá 100% khi hiển thị.
 - Contribution lưu amount dương trong lịch sử và cập nhật `saving_goals.current_amount` trong cùng một RPC có row lock. Khi đạt target, goal tự chuyển sang `completed`; không sửa tay current amount sau khi tạo.
 - Notification chỉ hiển thị dữ liệu user sở hữu; mark read không thay đổi dữ liệu tài chính.

@@ -6,6 +6,7 @@ Active migrations:
 - `supabase/migrations/202609091200_saving_goal_contribution.sql`
 - `supabase/migrations/202609091300_recurring_scheduler.sql` (legacy schema/RPC source)
 - `supabase/migrations/202609091500_remove_recurring_scheduler.sql`
+- `supabase/migrations/202609100900_monthly_loans.sql` (cần apply trên Supabase để bật Khoản vay)
 
 Hai migration đã được người dùng apply lên Supabase dev ngày 2026-09-09. Kết nối Auth endpoint từ workspace phản hồi thành công; kiểm thử tích hợp bằng authenticated test user vẫn là follow-up.
 
@@ -28,7 +29,9 @@ Authenticated client chỉ được select transactions. Quyền insert/update/d
 
 Accounts edit/archive/restore dùng column grant metadata hiện có, không cần migration mới.
 
-Budgets MVP sử dụng trực tiếp bảng `budgets` và policy hiện có, không cần migration mới. Server Action chỉ cho phép category expense mặc định hoặc category thuộc user; tắt budget bằng `is_active = false` thay vì hard delete. Progress được tính từ transactions chưa xóa mềm ở request time.
+Ngân sách đã được thay bằng Khoản vay; bảng `budgets` cũ giữ lịch sử, không còn được ứng dụng đọc/ghi.
+
+`loans` lưu số tiền VND cố định, ngày đóng đầu và số kỳ; `loan_payments` lưu kỳ đã đóng, amount snapshot, ngày ghi nhận theo Việt Nam. RLS chỉ cho owner SELECT; mọi mutation thông qua `save_monthly_loan`, `set_monthly_loan_archived`, `set_monthly_loan_payment`. Row locks cùng khóa duy nhất `(loan_id, installment_number)` bảo vệ retry và ngăn sửa lịch đã có payment. Các RPC không thay đổi accounts/transactions. Migration đã chạy thử trên PostgreSQL 16 tạm, chưa apply production.
 
 Migration `supabase/migrations/202609091200_saving_goal_contribution.sql` thêm RPC `add_saving_goal_contribution`, khóa goal, insert contribution và cập nhật `current_amount/status` atomic. Người triển khai cần apply migration này trước khi dùng nút thêm đóng góp.
 

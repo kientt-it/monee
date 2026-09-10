@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import {
-  calculateBudgetUsage,
   calculateNetCashFlow,
   calculateSavingRate,
   calculateTotalBalance,
@@ -8,6 +7,9 @@ import {
 import { getSupabaseAuthContext } from "@/lib/supabase/auth-context";
 import { getCurrentProfile } from "@/features/profile/queries/get-current-profile";
 import type { DashboardSummary } from "@/features/dashboard/types";
+import { getLoans } from "@/features/loans/queries/get-loans";
+import { summarizeLoans } from "@/features/loans/schedule";
+import { localToday } from "@/lib/date";
 
 const TIMEZONE = "Asia/Ho_Chi_Minh";
 const CATEGORY_COLORS = ["#087f5b", "#efaa47", "#8795c4", "#c46b79", "#5f8fbd"];
@@ -33,7 +35,6 @@ type AccountRow = {
 };
 
 type CategoryRow = { id: string; name: string; color: string | null };
-type BudgetRow = { amount: number | string; category_id: string | null };
 type GoalRow = { id: string; name: string; target_amount: number | string; current_amount: number | string; color: string | null; icon: string | null };
 
 function toSafeAmount(value: number | string) {
@@ -100,24 +101,23 @@ export async function getDashboardSummary(): Promise<DashboardSummary> {
 
   const now = new Date();
   const month = getMonthWindow(now);
-  const [accountsResult, monthTransactionsResult, recentTransactionsResult, categoriesResult, budgetsResult, goalsResult, notificationResult] = await Promise.all([
+  const [accountsResult, monthTransactionsResult, recentTransactionsResult, categoriesResult, loansResult, goalsResult, notificationResult] = await Promise.all([
     supabase.from("accounts").select("id,name,current_balance,is_archived,include_in_total").eq("user_id", user.id),
     supabase.from("transactions").select("type,amount,transaction_date,category_id").eq("user_id", user.id).is("deleted_at", null).gte("transaction_date", month.start).lt("transaction_date", month.end).order("transaction_date", { ascending: false }),
     supabase.from("transactions").select("id,type,amount,merchant,note,transaction_date,account_id,destination_account_id,category_id").eq("user_id", user.id).is("deleted_at", null).order("transaction_date", { ascending: false }).limit(5),
     supabase.from("categories").select("id,name,color").or(`user_id.is.null,user_id.eq.${user.id}`).eq("is_archived", false),
-    supabase.from("budgets").select("amount,category_id").eq("user_id", user.id).eq("is_active", true).eq("period", "monthly").lte("start_date", month.lastDate).or(`end_date.is.null,end_date.gte.${month.firstDate}`),
+    getLoans(),
     supabase.from("saving_goals").select("id,name,target_amount,current_amount,color,icon").eq("user_id", user.id).eq("status", "active").order("created_at", { ascending: true }).limit(3),
     supabase.from("notifications").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("is_read", false),
   ]);
 
-  const error = [accountsResult.error, monthTransactionsResult.error, recentTransactionsResult.error, categoriesResult.error, budgetsResult.error, goalsResult.error, notificationResult.error].find(Boolean);
+  const error = [accountsResult.error, monthTransactionsResult.error, recentTransactionsResult.error, categoriesResult.error, goalsResult.error, notificationResult.error].find(Boolean);
   if (error) throw new Error("Không thể tải tổng quan tài chính lúc này.");
 
   const accounts = (accountsResult.data ?? []) as AccountRow[];
   const monthTransactions = (monthTransactionsResult.data ?? []) as TransactionRow[];
   const recentTransactions = (recentTransactionsResult.data ?? []) as TransactionRow[];
   const categories = (categoriesResult.data ?? []) as CategoryRow[];
-  const budgets = (budgetsResult.data ?? []) as BudgetRow[];
   const goals = (goalsResult.data ?? []) as GoalRow[];
   const categoryMap = new Map(categories.map((category) => [category.id, category]));
   const accountMap = new Map(accounts.map((account) => [account.id, account.name]));
@@ -149,14 +149,6 @@ export async function getDashboardSummary(): Promise<DashboardSummary> {
     .sort((a, b) => b.amount - a.amount)
     .slice(0, 3);
 
-  const budgetAmount = budgets.reduce((total, budget) => total + toSafeAmount(budget.amount), 0);
-  const budgetCategories = new Set(budgets.flatMap((budget) => (budget.category_id ? [budget.category_id] : [])));
-  const hasGeneralBudget = budgets.some((budget) => budget.category_id === null);
-  const budgetSpent = monthTransactions
-    .filter((transaction) => transaction.type === "expense" && (hasGeneralBudget || (transaction.category_id && budgetCategories.has(transaction.category_id))))
-    .reduce((total, transaction) => total + toSafeAmount(transaction.amount), 0);
-  const budgetUsage = budgetAmount > 0 ? calculateBudgetUsage(budgetSpent, budgetAmount) : null;
-
   const fullName = profile.fullName.trim();
   const greetingName = fullName.split(/\s+/).filter(Boolean).at(-1) ?? user.email?.split("@")[0] ?? "bạn";
 
@@ -170,13 +162,7 @@ export async function getDashboardSummary(): Promise<DashboardSummary> {
     monthlyExpense,
     netCashFlow: calculateNetCashFlow(normalizedTransactions),
     savingRate: calculateSavingRate(normalizedTransactions),
-    budget: budgetUsage ? {
-      amount: budgetUsage.budget,
-      spent: budgetUsage.spent,
-      remaining: budgetUsage.remaining,
-      percentage: budgetUsage.percentage,
-      status: budgetUsage.status,
-    } : null,
+    loans: loansResult.available ? summarizeLoans(loansResult.loans, month.firstDate.slice(0, 7), localToday(now)) : null,
     spending,
     recentTransactions: recentTransactions.map((transaction) => {
       const category = transaction.category_id ? categoryMap.get(transaction.category_id) : null;

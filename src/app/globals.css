@@ -56,6 +56,15 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .app-shell { min-height: 100dvh; }
 .surface-shadow { box-shadow: var(--shadow); }
 
+/* Keep WebKit's native date content inside its flex track on iOS. */
+.date-input::-webkit-date-and-time-value { min-width: 0; text-align: left; }
+.date-input::-webkit-datetime-edit { padding: 0; }
+.date-input::-webkit-calendar-picker-indicator { flex-shrink: 0; margin: 0; }
+.loan-progress { appearance: none; background: var(--surface-muted); }
+.loan-progress::-webkit-progress-bar { background: var(--surface-muted); }
+.loan-progress::-webkit-progress-value { background: var(--brand); border-radius: 999px; }
+.loan-progress::-moz-progress-bar { background: var(--brand); border-radius: 999px; }
+
 @media (min-width: 900px) {
   .desktop-grid { grid-template-columns: 248px minmax(0, 1fr); }
 }

@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-09-10 · 0.20.0
+
+### Changed
+- Thay Ngân sách bằng Khoản vay trên desktop/mobile và dashboard; URL `/app/budgets` chuyển tới `/app/loans`.
+- Theo dõi kỳ đóng cố định hằng tháng: tạo/sửa, chọn tháng, ghi nhận/hoàn tác đã đóng, quá hạn, lưu trữ/khôi phục.
+- Dữ liệu ngân sách cũ được giữ trong database, không chuyển thành khoản vay.
+
+### Fixed
+- Ô ngày giao dịch không còn đặt icon đè lên nội dung native iOS; dùng chiều rộng co giãn, chiều cao ổn định và ngày mặc định theo Việt Nam.
+- Tăng khoảng trống dưới form giao dịch để nút lưu không bị thanh điều hướng mobile che.
+
+### Database
+- Thêm migration `202609100900_monthly_loans.sql`: loans/payment history, RLS và RPC bảo vệ quyền sở hữu, chống ghi trùng kỳ và khóa lịch đã có thanh toán.
+- Đã kiểm tra migration (bao gồm chạy lại) và quyền RPC/RLS trên PostgreSQL 16 tạm, chưa áp dụng Supabase production.
+
 ## 2026-09-09 · 0.19.1
 
 ### Fixed

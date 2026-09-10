@@ -4,11 +4,11 @@
 `src/app` chứa route và boundary; `src/features` chứa domain theo feature; `src/components` chứa UI/layout dùng chung; `src/lib/domain` chứa tính toán; `supabase/migrations` là source of truth schema; `docs` ghi lại quyết định.
 
 ## Data flow
-Server Components fetch initial data qua Supabase SSR client. Dashboard dùng một server query tổng hợp song song profile, accounts, giao dịch tháng/gần đây, categories, budgets, saving goals và số thông báo chưa đọc; client chỉ nhận view model đã chuẩn hóa. Client Components chỉ xử lý form, sheet, chart, filter và optimistic UI an toàn. Accounts create đi qua Server Action với Zod + auth check; create/edit/delete/restore giao dịch đều gọi PostgreSQL RPC atomic cho balance.
+Server Components fetch initial data qua Supabase SSR client. Dashboard dùng một server query tổng hợp song song profile, accounts, giao dịch tháng/gần đây, categories, loans, saving goals và số thông báo chưa đọc; client chỉ nhận view model đã chuẩn hóa. Client Components chỉ xử lý form, sheet, chart, filter và optimistic UI an toàn. Accounts create đi qua Server Action với Zod + auth check; create/edit/delete/restore giao dịch đều gọi PostgreSQL RPC atomic cho balance.
 
 Account metadata edit/archive/restore đi qua Server Actions, auth check, Zod và RLS; không có action nào nhận hoặc ghi `current_balance`. Query transaction options giữ account archived để render lịch sử, còn form create lọc chúng ở view model.
 
-Budgets dùng Server Component query `/app/budgets` để đọc budget, category expense và giao dịch trong các cửa sổ hiện tại; view model tính spent/remaining/status bằng domain calculation. Create/edit/toggle đi qua Server Action với Zod, auth, kiểm tra category expense và RLS; dashboard dùng lại dữ liệu budget tháng cho summary.
+Loans dùng `getLoans` với auth context dùng chung trong request và một truy vấn loan/payment. Logic lịch thuần được dùng lại ở dashboard và trang `/app/loans`; đổi tháng tại client không tạo request mới. Server Actions validate/authenticate rồi gọi RPC và revalidate hai route. `/app/budgets` chỉ redirect tới `/app/loans`; bảng ngân sách cũ giữ lịch sử.
 
 Reports dùng Server Component query `/app/reports` với range an toàn từ search params, lấy transactions theo trend window rồi chuẩn hóa tại server thành summary, top categories và trend series. Chart là client-only Recharts component nhận view model đã chuẩn hóa; transfer và transaction soft-deleted không xuất hiện trong báo cáo.
 
