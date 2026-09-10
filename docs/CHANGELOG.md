@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-09-10 · 0.20.2
+
+### Fixed
+- Cho phép sửa “Số dư ban đầu” ngay trong form Sửa tài khoản; số dư hiện tại được điều chỉnh theo phần chênh lệch và lịch sử giao dịch cũ không thay đổi.
+- Ô số dư ban đầu khi sửa tài khoản dùng cùng định dạng dấu chấm theo Việt Nam như form thêm mới.
+
+### Database
+- Thêm migration `202609101200_edit_account_initial_balance.sql` với RPC cập nhật tài khoản atomic, kiểm tra owner và khóa bản ghi.
+- Migration cần được apply thủ công trên Supabase SQL Editor; chưa làm thay đổi dữ liệu production từ workspace.
+
 ## 2026-09-10 · 0.20.1
 
 ### Fixed

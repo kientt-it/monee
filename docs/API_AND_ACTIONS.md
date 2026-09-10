@@ -10,6 +10,8 @@ Server Actions cho CRUD sẽ validate bằng Zod, gọi service/domain layer, ma
 
 `createAccountAction(input)` — authenticated; validate tên, loại, tiền BIGINT và currency bằng `accountSchema`; gọi `create_financial_account` để server buộc initial/current balance bằng nhau; revalidate `/app/accounts` và `/app`.
 
+`updateAccountAction(id, input)` — authenticated; validate metadata và `initialBalance` bằng `accountEditSchema`; gọi `update_financial_account` để điều chỉnh current balance theo chênh lệch opening balance mà không sửa lịch sử giao dịch; revalidate `/app`, `/app/accounts` và `/app/transactions`.
+
 `createTransactionAction(input)` — authenticated; validate bằng `transactionSchema`; gọi `create_financial_transaction` với idempotency key; RPC insert transaction và cập nhật account balances atomic; map lỗi ownership/transfer/category thành thông báo thân thiện.
 
 `updateTransactionAction(id, input)` — authenticated; gọi `update_financial_transaction`; reverse effect cũ và apply effect mới trước khi update record, tất cả trong một DB transaction.

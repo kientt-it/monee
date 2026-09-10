@@ -11,10 +11,13 @@ const accountMetadataFields = {
 };
 
 export const accountMetadataSchema = z.object(accountMetadataFields);
+const accountInitialBalanceSchema = z.number().int("Số dư phải là số nguyên.").nonnegative("Số dư ban đầu không được âm.").max(1_000_000_000_000, "Số dư ban đầu vượt giới hạn.");
 export const accountSchema = z.object({
   ...accountMetadataFields,
-  initialBalance: z.number().int("Số dư phải là số nguyên.").nonnegative("Số dư ban đầu không được âm."),
+  initialBalance: accountInitialBalanceSchema,
 });
+export const accountEditSchema = accountMetadataSchema.extend({ initialBalance: accountInitialBalanceSchema });
 
 export type AccountInput = z.infer<typeof accountSchema>;
 export type AccountMetadataInput = z.infer<typeof accountMetadataSchema>;
+export type AccountEditInput = z.infer<typeof accountEditSchema>;

@@ -21,8 +21,8 @@ import type { CategoryOption } from "@/features/transactions/queries/get-transac
 import type { TransactionRecord } from "@/features/transactions/queries/get-transactions";
 
 const fallbackAccounts: AccountRecord[] = [
-  { id: "00000000-0000-0000-0000-000000000001", name: "Tiền mặt", type: "cash", current_balance: 1250000, currency: "VND", color: "#efaa47", is_archived: false, include_in_total: true },
-  { id: "00000000-0000-0000-0000-000000000002", name: "Vietcombank", type: "bank", current_balance: 15700000, currency: "VND", color: "#087f5b", is_archived: false, include_in_total: true },
+  { id: "00000000-0000-0000-0000-000000000001", name: "Tiền mặt", type: "cash", initial_balance: 1250000, current_balance: 1250000, currency: "VND", color: "#efaa47", is_archived: false, include_in_total: true },
+  { id: "00000000-0000-0000-0000-000000000002", name: "Vietcombank", type: "bank", initial_balance: 15700000, current_balance: 15700000, currency: "VND", color: "#087f5b", is_archived: false, include_in_total: true },
 ];
 const fallbackCategories: CategoryOption[] = [
   { id: "00000000-0000-0000-0000-000000000011", name: "Ăn uống", type: "expense" },

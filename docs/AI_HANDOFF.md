@@ -1,7 +1,7 @@
 # AI handoff
 
 ## Current project state
-Version 0.20.0. Foundation, onboarding/profile, Accounts, Transactions, Monthly Loans, Reports, Saving Goals và Notifications MVP core đã có bằng Next.js App Router + TypeScript strict + Tailwind. Supabase dev đã được kết nối; dashboard trong khu vực đăng nhập đọc dữ liệu thật. Khoản vay cần apply migration `202609100900_monthly_loans.sql` trên Supabase.
+Version 0.20.2. Foundation, onboarding/profile, Accounts, Transactions, Monthly Loans, Reports, Saving Goals và Notifications MVP core đã có bằng Next.js App Router + TypeScript strict + Tailwind. Supabase dev đã được kết nối; dashboard trong khu vực đăng nhập đọc dữ liệu thật. Khoản vay cần apply migration `202609100900_monthly_loans.sql`; sửa Số dư ban đầu cần apply thêm `202609101200_edit_account_initial_balance.sql` trên Supabase.
 
 ## Working
 - Root `/` điều hướng theo phiên Supabase: chưa đăng nhập vào `/login`, đã đăng nhập vào `/app`; `/app` tổng hợp profile, account, giao dịch tháng, khoản vay, mục tiêu và thông báo từ Supabase.

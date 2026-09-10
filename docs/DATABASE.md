@@ -7,6 +7,7 @@ Active migrations:
 - `supabase/migrations/202609091300_recurring_scheduler.sql` (legacy schema/RPC source)
 - `supabase/migrations/202609091500_remove_recurring_scheduler.sql`
 - `supabase/migrations/202609100900_monthly_loans.sql` (cần apply trên Supabase để bật Khoản vay)
+- `supabase/migrations/202609101200_edit_account_initial_balance.sql` (cần apply trên Supabase để sửa Số dư ban đầu)
 
 Hai migration đã được người dùng apply lên Supabase dev ngày 2026-09-09. Kết nối Auth endpoint từ workspace phản hồi thành công; kiểm thử tích hợp bằng authenticated test user vẫn là follow-up.
 
@@ -25,9 +26,9 @@ Tất cả bảng dữ liệu user bật RLS. Policy giới hạn theo `auth.uid
 
 `create_financial_account` buộc `current_balance = initial_balance`, validate owner/name/currency và là đường tạo account duy nhất từ client.
 
-Authenticated client chỉ được select transactions. Quyền insert/update/delete trực tiếp transactions và accounts đã bị revoke; metadata account chỉ update qua column grant, còn `current_balance` không thể ghi trực tiếp.
+`update_financial_account` khóa account thuộc user, cập nhật metadata và `initial_balance` atomic; `current_balance` thay đổi đúng bằng phần chênh lệch của số dư ban đầu để các transaction cũ vẫn giữ nguyên tác động.
 
-Accounts edit/archive/restore dùng column grant metadata hiện có, không cần migration mới.
+Authenticated client chỉ được select transactions. Quyền insert/update/delete trực tiếp transactions và accounts đã bị revoke; metadata account chỉ update qua column grant, còn `initial_balance` và `current_balance` không thể ghi trực tiếp. Accounts edit dùng RPC; archive/restore dùng column grant metadata hiện có.
 
 Ngân sách đã được thay bằng Khoản vay; bảng `budgets` cũ giữ lịch sử, không còn được ứng dụng đọc/ghi.
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { accountMetadataSchema, accountSchema } from "./account.schema";
+import { accountEditSchema, accountMetadataSchema, accountSchema } from "./account.schema";
 
 const metadata = {
   name: "Ví hằng ngày",
@@ -16,6 +16,11 @@ describe("account schemas", () => {
 
   it("rejects negative opening balances", () => {
     expect(accountSchema.safeParse({ ...metadata, initialBalance: -1 }).success).toBe(false);
+  });
+
+  it("accepts an editable opening balance and caps unsafe amounts", () => {
+    expect(accountEditSchema.safeParse({ ...metadata, initialBalance: 2_500_000 }).success).toBe(true);
+    expect(accountEditSchema.safeParse({ ...metadata, initialBalance: 1_000_000_000_001 }).success).toBe(false);
   });
 
   it("validates editable metadata without accepting a balance", () => {

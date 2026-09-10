@@ -11,7 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { MoneyInput } from "@/components/ui/money-input";
 import { createAccountAction } from "@/features/accounts/actions/create-account";
 import { archiveAccountAction, restoreAccountAction, updateAccountAction } from "@/features/accounts/actions/update-account";
-import { accountMetadataSchema, accountSchema, type AccountInput, type AccountMetadataInput } from "@/features/accounts/schemas/account.schema";
+import { accountEditSchema, accountSchema, type AccountEditInput, type AccountInput } from "@/features/accounts/schemas/account.schema";
 import type { AccountRecord } from "@/features/accounts/queries/get-accounts";
 import { formatCurrency } from "@/lib/utils";
 
@@ -27,10 +27,10 @@ const typeLabels: Record<AccountRecord["type"], string> = {
 const typeIcons = { cash: WalletCards, bank: Landmark, ewallet: WalletCards, credit_card: CreditCard, saving: Building2, investment: Building2, other: WalletCards };
 
 const demoAccounts: AccountRecord[] = [
-  { id: "demo-cash", name: "Tiền mặt", type: "cash", current_balance: 1_250_000, currency: "VND", color: "#efaa47", is_archived: false, include_in_total: true },
-  { id: "demo-bank", name: "Vietcombank", type: "bank", current_balance: 15_700_000, currency: "VND", color: "#087f5b", is_archived: false, include_in_total: true },
-  { id: "demo-wallet", name: "Momo", type: "ewallet", current_balance: 850_000, currency: "VND", color: "#a477b9", is_archived: false, include_in_total: true },
-  { id: "demo-saving", name: "Tiết kiệm", type: "saving", current_balance: 35_000_000, currency: "VND", color: "#8795c4", is_archived: false, include_in_total: true },
+  { id: "demo-cash", name: "Tiền mặt", type: "cash", initial_balance: 1_250_000, current_balance: 1_250_000, currency: "VND", color: "#efaa47", is_archived: false, include_in_total: true },
+  { id: "demo-bank", name: "Vietcombank", type: "bank", initial_balance: 15_700_000, current_balance: 15_700_000, currency: "VND", color: "#087f5b", is_archived: false, include_in_total: true },
+  { id: "demo-wallet", name: "Momo", type: "ewallet", initial_balance: 850_000, current_balance: 850_000, currency: "VND", color: "#a477b9", is_archived: false, include_in_total: true },
+  { id: "demo-saving", name: "Tiết kiệm", type: "saving", initial_balance: 35_000_000, current_balance: 35_000_000, currency: "VND", color: "#8795c4", is_archived: false, include_in_total: true },
 ];
 
 export function AccountsView({ accounts, configured }: { accounts: AccountRecord[]; configured: boolean }) {
@@ -48,9 +48,9 @@ export function AccountsView({ accounts, configured }: { accounts: AccountRecord
     resolver: zodResolver(accountSchema),
     defaultValues: { name: "", type: "cash", initialBalance: 0, currency: "VND", color: "#087f5b", includeInTotal: true },
   });
-  const editForm = useForm<AccountMetadataInput>({
-    resolver: zodResolver(accountMetadataSchema),
-    defaultValues: { name: "", type: "cash", currency: "VND", color: "#087f5b", includeInTotal: true },
+  const editForm = useForm<AccountEditInput>({
+    resolver: zodResolver(accountEditSchema),
+    defaultValues: { name: "", type: "cash", initialBalance: 0, currency: "VND", color: "#087f5b", includeInTotal: true },
   });
 
   function openCreateDialog() {
@@ -60,7 +60,7 @@ export function AccountsView({ accounts, configured }: { accounts: AccountRecord
 
   function openEditDialog(account: AccountRecord) {
     setEditingAccount(account);
-    editForm.reset({ name: account.name, type: account.type, currency: "VND", color: account.color ?? "#087f5b", includeInTotal: account.include_in_total });
+    editForm.reset({ name: account.name, type: account.type, initialBalance: account.initial_balance, currency: "VND", color: account.color ?? "#087f5b", includeInTotal: account.include_in_total });
     setDialog("edit");
   }
 
@@ -78,7 +78,7 @@ export function AccountsView({ accounts, configured }: { accounts: AccountRecord
     });
   }
 
-  function submitEdit(values: AccountMetadataInput) {
+  function submitEdit(values: AccountEditInput) {
     if (!editingAccount) return;
     startTransition(async () => {
       const result = await updateAccountAction(editingAccount.id, values);
@@ -191,10 +191,11 @@ export function AccountsView({ accounts, configured }: { accounts: AccountRecord
       {dialog === "edit" && editingAccount && (
         <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/35 p-0 sm:items-center sm:p-4" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setDialog(null); }}>
           <section role="dialog" aria-modal="true" aria-labelledby="edit-account-title" className="w-full max-w-lg rounded-t-[24px] bg-[var(--surface)] p-5 shadow-2xl sm:rounded-[24px]">
-            <div className="mb-5 flex items-center justify-between"><div><h2 id="edit-account-title" className="text-lg font-bold">Sửa tài khoản</h2><p className="mt-1 text-sm text-[var(--muted)]">Số dư chỉ thay đổi qua giao dịch.</p></div><button type="button" aria-label="Đóng" onClick={() => setDialog(null)} className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-[var(--surface-muted)]"><X size={19} /></button></div>
+            <div className="mb-5 flex items-center justify-between"><div><h2 id="edit-account-title" className="text-lg font-bold">Sửa tài khoản</h2><p className="mt-1 text-sm text-[var(--muted)]">Bạn có thể điều chỉnh số dư ban đầu; lịch sử giao dịch vẫn được giữ.</p></div><button type="button" aria-label="Đóng" onClick={() => setDialog(null)} className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-[var(--surface-muted)]"><X size={19} /></button></div>
             <form onSubmit={editForm.handleSubmit(submitEdit)} className="space-y-4">
               <label className="block text-sm font-semibold">Tên tài khoản<input {...editForm.register("name")} autoFocus className="mt-2 min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-base" />{editForm.formState.errors.name && <span className="mt-1 block text-xs text-[var(--danger)]">{editForm.formState.errors.name.message}</span>}</label>
               <div className="grid grid-cols-[1fr_72px] gap-3"><label className="block text-sm font-semibold">Loại tài khoản<select {...editForm.register("type")} className="mt-2 min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-base">{Object.entries(typeLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label><label className="block text-sm font-semibold">Màu<input {...editForm.register("color")} type="color" className="mt-2 h-11 w-full cursor-pointer rounded-xl border border-[var(--border)] bg-[var(--surface)] p-1" /></label></div>
+              <label className="block text-sm font-semibold">Số dư ban đầu<Controller control={editForm.control} name="initialBalance" render={({ field }) => <MoneyInput name={field.name} ref={field.ref} value={field.value} onValueChange={field.onChange} onBlur={field.onBlur} min={0} placeholder="0" aria-label="Số dư ban đầu" />} />{editForm.formState.errors.initialBalance && <span className="mt-1 block text-xs text-[var(--danger)]">{editForm.formState.errors.initialBalance.message}</span>}<span className="mt-1 block text-xs font-normal text-[var(--muted)]">Số dư hiện tại sẽ điều chỉnh theo phần chênh lệch; các giao dịch cũ không thay đổi.</span></label>
               <label className="flex cursor-pointer items-start gap-3 rounded-xl bg-[var(--surface-muted)] p-3 text-sm"><input {...editForm.register("includeInTotal")} type="checkbox" className="mt-1 h-4 w-4 accent-[var(--brand)]" /><span><strong className="block">Tính vào tổng tài sản</strong><span className="mt-0.5 block text-xs text-[var(--muted)]">Tắt nếu đây là tài khoản chỉ dùng để theo dõi riêng.</span></span></label>
               <Button type="submit" className="w-full" disabled={isPending}>{isPending ? "Đang lưu…" : "Lưu thay đổi"}</Button>
             </form>
