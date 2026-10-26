@@ -19,7 +19,7 @@ Version 0.20.2. Foundation, onboarding/profile, Accounts, Transactions, Khoản 
 - `/app/accounts` có create/edit/archive/restore, tùy chọn include-in-total và giữ khu vực account đã lưu trữ.
 - `/app/transactions` và `/app/transactions/new` có list/form; create action gọi `create_financial_transaction` với idempotency key. Danh sách có filter loại/tháng, phân trang 50 dòng và undo sau soft-delete.
 - `/app/transactions/[id]` và `/edit` đã có detail/edit/soft-delete. Migration thứ hai thêm update/delete/restore RPC và revoke direct writes. DateInput dùng flex tách icon để tránh chồng ngày iOS; form chừa chỗ bottom nav. 25 tests đang pass.
-- `/app/payables` cho phép thêm/sửa/xóa từng khoản hoặc xóa hàng loạt, lọc theo ngày/tháng, đánh dấu đã trả và hoàn tác. Chỉ theo dõi, không trừ account. `/app/budgets` và `/app/loans` redirect; dữ liệu cũ giữ nguyên. Payables RLS/RPC đã kiểm thử PostgreSQL 16 độc lập.
+- `/app/payables` cho phép thêm/sửa/xóa từng khoản hoặc xóa hàng loạt, lọc bằng hai lịch Từ ngày/Đến ngày, đánh dấu đã trả và hoàn tác. Chỉ theo dõi, không trừ account. `/app/budgets` và `/app/loans` redirect; dữ liệu cũ giữ nguyên. Payables RLS/RPC đã kiểm thử PostgreSQL 16 độc lập.
 - `/app/reports` có báo cáo tuần/tháng/năm/tùy chỉnh; hiển thị thu nhập, chi tiêu, dòng tiền ròng, tỷ lệ tiết kiệm, nhóm chi tiêu và biểu đồ xu hướng. Dữ liệu chỉ lấy transaction expense/income chưa xóa mềm.
 - `/app/goals` có create/edit, mục tiêu theo target date/account, progress, tạm dừng/tiếp tục và thêm contribution. Contribution gọi RPC atomic để cập nhật lịch sử và cached `current_amount` cùng lúc.
 - `/app/recurring` là URL tương thích cũ và chuyển về `/app`; `/app/notifications` hiển thị 50 thông báo gần nhất và đánh dấu đã đọc từng mục hoặc tất cả.

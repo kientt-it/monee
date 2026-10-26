@@ -10,10 +10,13 @@ const items: PayableRecord[] = [
 ];
 
 describe("payables", () => {
-  it("filters by exact due day and due month", () => {
-    expect(filterPayables(items, { mode: "day", value: "2026-10-26" }).map((item) => item.id)).toEqual(["b"]);
-    expect(filterPayables(items, { mode: "month", value: "2026-10" }).map((item) => item.id)).toEqual(["a", "b"]);
-    expect(filterPayables(items, { mode: "all" })).toEqual(items);
+  it("filters by inclusive due date range and supports open ends", () => {
+    expect(filterPayables(items, { fromDate: "2026-10-26", toDate: "2026-10-26" }).map((item) => item.id)).toEqual(["b"]);
+    expect(filterPayables(items, { fromDate: "2026-10-25", toDate: "2026-10-26" }).map((item) => item.id)).toEqual(["a", "b"]);
+    expect(filterPayables(items, { fromDate: "2026-10-26", toDate: "" }).map((item) => item.id)).toEqual(["b", "c"]);
+    expect(filterPayables(items, { fromDate: "", toDate: "2026-10-26" }).map((item) => item.id)).toEqual(["a", "b"]);
+    expect(filterPayables(items, { fromDate: "", toDate: "" })).toEqual(items);
+    expect(filterPayables(items, { fromDate: "2026-11-01", toDate: "2026-10-25" })).toEqual([]);
   });
 
   it("excludes paid items from remaining and overdue amounts", () => {

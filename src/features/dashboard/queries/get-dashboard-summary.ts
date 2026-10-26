@@ -162,7 +162,7 @@ export async function getDashboardSummary(): Promise<DashboardSummary> {
     monthlyExpense,
     netCashFlow: calculateNetCashFlow(normalizedTransactions),
     savingRate: calculateSavingRate(normalizedTransactions),
-    payables: payablesResult.available ? summarizePayables(filterPayables(payablesResult.payables, { mode: "month", value: month.firstDate.slice(0, 7) }), localToday(now)) : null,
+    payables: payablesResult.available ? summarizePayables(filterPayables(payablesResult.payables, { fromDate: month.firstDate, toDate: month.lastDate }), localToday(now)) : null,
     spending,
     recentTransactions: recentTransactions.map((transaction) => {
       const category = transaction.category_id ? categoryMap.get(transaction.category_id) : null;

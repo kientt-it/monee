@@ -1,8 +1,8 @@
-import type { PayableFilter, PayableRecord, PayableSummary } from "./types";
+import type { PayableDateRange, PayableRecord, PayableSummary } from "./types";
 
-export function filterPayables(items: PayableRecord[], filter: PayableFilter) {
-  if (filter.mode === "all") return items;
-  return items.filter((item) => filter.mode === "day" ? item.dueDate === filter.value : item.dueDate.startsWith(`${filter.value}-`));
+export function filterPayables(items: PayableRecord[], { fromDate, toDate }: PayableDateRange) {
+  if (fromDate && toDate && fromDate > toDate) return [];
+  return items.filter((item) => (!fromDate || item.dueDate >= fromDate) && (!toDate || item.dueDate <= toDate));
 }
 
 export function summarizePayables(items: PayableRecord[], today: string): PayableSummary {

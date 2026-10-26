@@ -7,7 +7,7 @@
 | Auth + onboarding | Implemented core | Login/register/recovery, route protection, onboarding, profile, theme và sign-out; cần E2E |
 | Accounts | Implemented MVP core | Create/edit/archive/restore, include-in-total, lịch sử giữ account archived; delete vĩnh viễn không hỗ trợ |
 | Transactions | Implemented MVP core | List/detail/create/edit/soft-delete/undo; atomic RPC; server-side type/month filters; pagination; 9 domain tests; receipt planned |
-| Khoản cần trả | Implemented | `/app/payables`: thêm/sửa/xóa, chọn và xóa hàng loạt, lọc theo ngày/tháng/tất cả, đánh dấu đã trả/hoàn tác; cần migration `202610261200_payables.sql`. Chỉ theo dõi, không trừ số dư. |
+| Khoản cần trả | Implemented | `/app/payables`: thêm/sửa/xóa, chọn và xóa hàng loạt, lọc theo khoảng từ ngày đến ngày, đánh dấu đã trả/hoàn tác; cần migration `202610261200_payables.sql`. Chỉ theo dõi, không trừ số dư. |
 | Reports | Implemented MVP core | `/app/reports`: week/month/year/custom, summary thu-chi-ròng-saving rate, top categories và trend chart |
 | Saving goals | Implemented MVP core | `/app/goals`: create/edit/delete, target date/account, progress, pause/resume và contribution history qua atomic RPC; xóa mục tiêu sẽ xóa lịch sử đóng góp liên quan |
 | Notifications | Implemented core | `/app/notifications`: list, unread state, mark one/all read |

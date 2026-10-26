@@ -12,7 +12,7 @@
 - VND lưu BIGINT, không lưu chuỗi tiền đã format.
 - Credit card MVP giữ cùng quy ước balance hiện tại; chưa triển khai logic kỳ sao kê/lãi.
 - Saving goal có contribution history; cached current_amount phải đồng bộ với contributions.
-- Mỗi khoản cần trả là một mục độc lập gồm tên, số tiền, ngày cần trả, ghi chú và ngày ghi nhận đã trả. Lọc theo ngày/tháng dựa trên ngày cần trả.
+- Mỗi khoản cần trả là một mục độc lập gồm tên, số tiền, ngày cần trả, ghi chú và ngày ghi nhận đã trả. Lọc theo khoảng ngày bao gồm cả ngày bắt đầu và kết thúc; bỏ trống một đầu để lọc một phía, bỏ trống cả hai để xem tất cả.
 - Quá hạn là khoản chưa trả có ngày cần trả trước hôm nay theo Việt Nam. Đánh dấu đã trả/hoàn tác không tạo transaction hay thay đổi balance.
 - Xóa hàng loạt chỉ xóa các mục thuộc user hiện tại; xóa là vĩnh viễn. Bảng khoản vay cũ được giữ trong database như dữ liệu lịch sử nhưng ứng dụng không đọc/ghi nữa.
 - Dữ liệu budgets cũ chỉ giữ lịch sử trong database, không còn được app đọc/ghi.

@@ -8,7 +8,7 @@ Server Components fetch initial data qua Supabase SSR client. Dashboard dùng m�
 
 Account metadata edit/archive/restore đi qua Server Actions, auth check, Zod và RLS; không có action nào nhận hoặc ghi `current_balance`. Query transaction options giữ account archived để render lịch sử, còn form create lọc chúng ở view model.
 
-Khoản cần trả dùng `getPayables` với auth context dùng chung trong request. Lọc ngày/tháng và tính tổng ở client bằng hàm thuần; dashboard tổng hợp tháng hiện tại. Server Actions validate/authenticate và dùng RLS; xóa hàng loạt qua một RPC. `/app/budgets` và `/app/loans` chuyển tới `/app/payables`; các bảng cũ giữ lịch sử.
+Khoản cần trả dùng `getPayables` với auth context dùng chung trong request. Lọc khoảng ngày và tính tổng ở client bằng hàm thuần; dashboard tổng hợp tháng hiện tại. Server Actions validate/authenticate và dùng RLS; xóa hàng loạt qua một RPC. `/app/budgets` và `/app/loans` chuyển tới `/app/payables`; các bảng cũ giữ lịch sử.
 
 Reports dùng Server Component query `/app/reports` với range an toàn từ search params, lấy transactions theo trend window rồi chuẩn hóa tại server thành summary, top categories và trend series. Chart là client-only Recharts component nhận view model đã chuẩn hóa; transfer và transaction soft-deleted không xuất hiện trong báo cáo.
 
