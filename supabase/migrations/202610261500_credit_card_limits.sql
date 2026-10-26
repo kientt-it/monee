@@ -1,13 +1,15 @@
 begin;
 
 alter table public.accounts add column credit_limit bigint;
+-- Older cards could have been created with an opening balance of zero.
+-- Keep that value as an unset legacy limit until the owner enters a real limit.
 update public.accounts set credit_limit = initial_balance where type = 'credit_card';
 alter table public.accounts drop constraint accounts_initial_balance_check;
 alter table public.accounts add constraint accounts_opening_balance_check
   check ((type = 'credit_card' and initial_balance between -1000000000000 and 1000000000000)
     or (type <> 'credit_card' and initial_balance between 0 and 1000000000000));
 alter table public.accounts add constraint accounts_credit_limit_check
-  check ((type = 'credit_card' and credit_limit between 1 and 1000000000000)
+  check ((type = 'credit_card' and credit_limit between 0 and 1000000000000)
     or (type <> 'credit_card' and credit_limit is null));
 
 -- initial_balance stays the reconciliation baseline; credit_limit is the card limit.

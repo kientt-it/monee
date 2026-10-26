@@ -32,7 +32,7 @@ Tất cả bảng dữ liệu user bật RLS. Policy giới hạn theo `auth.uid
 
 `payables.kind` phân biệt khoản thủ công và khoản `credit_card_repayment`; `credit_account_id` unique bảo đảm một khoản cho mỗi thẻ. Trigger tài khoản tính amount từ hạn mức trừ hạn mức còn lại, bắt buộc thẻ tín dụng không nằm trong tổng tài sản. RLS chỉ cho người dùng sửa/xóa khoản thủ công. RPC `pay_credit_card` khóa tài khoản, kiểm tra số tiền và tạo transfer từ tài khoản nguồn vào thẻ trong một giao dịch database.
 
-`accounts.credit_limit` lưu hạn mức riêng; `current_balance` là khả dụng của thẻ. `initial_balance` là mốc tính lại số dư từ lịch sử giao dịch. Các RPC account v2 cho nhập hạn mức và khả dụng khi tạo/sửa thẻ, đồng thời điều chỉnh mốc này để lịch sử giao dịch vẫn khớp. Migration 1500 chuyển hạn mức cũ từ `initial_balance` sang `credit_limit` và cập nhật RPC hoàn trả cùng trigger tính khoản nợ.
+`accounts.credit_limit` lưu hạn mức riêng; `current_balance` là khả dụng của thẻ. `initial_balance` là mốc tính lại số dư từ lịch sử giao dịch. Các RPC account v2 cho nhập hạn mức và khả dụng khi tạo/sửa thẻ, đồng thời điều chỉnh mốc này để lịch sử giao dịch vẫn khớp. Migration 1500 chuyển hạn mức cũ từ `initial_balance` sang `credit_limit` và cập nhật RPC hoàn trả cùng trigger tính khoản nợ. Thẻ cũ có `initial_balance = 0` giữ hạn mức 0 như giá trị chưa được khai báo; khi sửa thẻ cần nhập hạn mức thực.
 
 `create_financial_account_v2` tạo account qua RPC, validate owner/name/currency và lưu riêng hạn mức/khả dụng với thẻ tín dụng. RPC cũ còn trong migration lịch sử.
 
