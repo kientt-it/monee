@@ -11,6 +11,7 @@ Active migrations:
 - `supabase/migrations/202610261200_payables.sql` (cần apply để bật Khoản cần trả)
 - `supabase/migrations/202610261300_bulk_delete_transactions.sql` (cần apply để xóa nhiều giao dịch)
 - `supabase/migrations/202610261400_credit_card_payables.sql` (cần apply để đồng bộ khoản hoàn trả thẻ tín dụng)
+- `supabase/migrations/202610261500_credit_card_limits.sql` (cần apply để nhập riêng hạn mức và khả dụng thẻ)
 
 Hai migration đã được người dùng apply lên Supabase dev ngày 2026-09-09. Kết nối Auth endpoint từ workspace phản hồi thành công; kiểm thử tích hợp bằng authenticated test user vẫn là follow-up.
 
@@ -31,9 +32,11 @@ Tất cả bảng dữ liệu user bật RLS. Policy giới hạn theo `auth.uid
 
 `payables.kind` phân biệt khoản thủ công và khoản `credit_card_repayment`; `credit_account_id` unique bảo đảm một khoản cho mỗi thẻ. Trigger tài khoản tính amount từ hạn mức trừ hạn mức còn lại, bắt buộc thẻ tín dụng không nằm trong tổng tài sản. RLS chỉ cho người dùng sửa/xóa khoản thủ công. RPC `pay_credit_card` khóa tài khoản, kiểm tra số tiền và tạo transfer từ tài khoản nguồn vào thẻ trong một giao dịch database.
 
-`create_financial_account` buộc `current_balance = initial_balance`, validate owner/name/currency và là đường tạo account duy nhất từ client.
+`accounts.credit_limit` lưu hạn mức riêng; `current_balance` là khả dụng của thẻ. `initial_balance` là mốc tính lại số dư từ lịch sử giao dịch. Các RPC account v2 cho nhập hạn mức và khả dụng khi tạo/sửa thẻ, đồng thời điều chỉnh mốc này để lịch sử giao dịch vẫn khớp. Migration 1500 chuyển hạn mức cũ từ `initial_balance` sang `credit_limit` và cập nhật RPC hoàn trả cùng trigger tính khoản nợ.
 
-`update_financial_account` khóa account thuộc user, cập nhật metadata và `initial_balance` atomic; `current_balance` thay đổi đúng bằng phần chênh lệch của số dư ban đầu để các transaction cũ vẫn giữ nguyên tác động.
+`create_financial_account_v2` tạo account qua RPC, validate owner/name/currency và lưu riêng hạn mức/khả dụng với thẻ tín dụng. RPC cũ còn trong migration lịch sử.
+
+`update_financial_account_v2` khóa account thuộc user, cập nhật metadata và số dư gốc atomic; với thẻ, nó nhận hạn mức và khả dụng riêng rồi điều chỉnh mốc để các transaction cũ vẫn giữ nguyên tác động.
 
 Authenticated client chỉ được select transactions. Quyền insert/update/delete trực tiếp transactions và accounts đã bị revoke; metadata account chỉ update qua column grant, còn `initial_balance` và `current_balance` không thể ghi trực tiếp. Accounts edit dùng RPC; archive/restore dùng column grant metadata hiện có.
 

@@ -10,7 +10,7 @@
 - Archive account không sửa số dư hay lịch sử; account đã archive không dùng cho giao dịch mới nhưng vẫn hiện đúng tên trong giao dịch cũ.
 - Net cash flow = income − expense; saving rate = net cash flow / income × 100, bằng 0 nếu income bằng 0.
 - VND lưu BIGINT, không lưu chuỗi tiền đã format.
-- Với thẻ tín dụng, `initial_balance` là hạn mức và `current_balance` là hạn mức còn lại. Mỗi thẻ có đúng một khoản loại `credit_card_repayment`, số còn phải trả = `max(0, initial_balance - current_balance)`. Khoản này không có ngày trả, không cho sửa/xóa thủ công và luôn hiện dù đang lọc theo ngày. Chưa tính kỳ sao kê/lãi.
+- Với thẻ tín dụng, `credit_limit` là hạn mức, `current_balance` là khả dụng hiện tại; `initial_balance` chỉ là số dư gốc để tính lại lịch sử giao dịch. Mỗi thẻ có đúng một khoản loại `credit_card_repayment`, số còn phải trả = `max(0, credit_limit - current_balance)`. Khoản này không có ngày trả, không cho sửa/xóa thủ công và luôn hiện dù đang lọc theo ngày. Chưa tính kỳ sao kê/lãi.
 - Ghi nhận trả một phần qua khoản cần trả tạo giao dịch transfer từ tài khoản nguồn vào thẻ. Tiền nguồn giảm, hạn mức còn lại tăng, khoản còn phải trả giảm trong cùng một database transaction. Transfer không tính là thu nhập/chi tiêu.
 - Saving goal có contribution history; cached current_amount phải đồng bộ với contributions.
 - Khoản cần trả thông thường gồm tên, số tiền, ngày cần trả, ghi chú và ngày ghi nhận đã trả. Lọc theo khoảng ngày bao gồm cả ngày bắt đầu và kết thúc; bỏ trống cả hai để xem tất cả. Khoản hoàn trả thẻ tín dụng không chịu bộ lọc ngày.

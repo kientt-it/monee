@@ -8,9 +8,11 @@
 
 Server Actions cho CRUD sẽ validate bằng Zod, gọi service/domain layer, map lỗi RPC, rồi revalidate route.
 
-`createAccountAction(input)` — authenticated; validate tên, loại, tiền BIGINT và currency bằng `accountSchema`; gọi `create_financial_account` để server buộc initial/current balance bằng nhau; revalidate `/app/accounts` và `/app`.
+`createAccountAction(input)` — authenticated; validate tên, loại, tiền BIGINT và currency bằng `accountSchema`; gọi `create_financial_account_v2`, với thẻ nhận thêm hạn mức và khả dụng; revalidate Tài khoản, Khoản cần trả và Tổng quan.
 
-`updateAccountAction(id, input)` — authenticated; validate metadata và `initialBalance` bằng `accountEditSchema`; gọi `update_financial_account` để điều chỉnh current balance theo chênh lệch opening balance mà không sửa lịch sử giao dịch; revalidate `/app`, `/app/accounts` và `/app/transactions`.
+`updateAccountAction(id, input)` — authenticated; validate metadata và số tiền bằng `accountEditSchema`; gọi `update_financial_account_v2` để sửa hạn mức/khả dụng của thẻ hoặc số dư ban đầu của tài khoản thường, giữ lịch sử giao dịch; revalidate các màn liên quan.
+
+Tài khoản thẻ tín dụng dùng RPC account v2: nhập `creditLimit` và `availableCredit` riêng khi tạo/sửa. `credit_limit` lưu hạn mức; `current_balance` lưu khả dụng; RPC sửa điều chỉnh mốc `initial_balance` để tính lại lịch sử vẫn đúng. Cần migration `202610261500_credit_card_limits.sql`.
 
 `createTransactionAction(input)` — authenticated; validate bằng `transactionSchema`; gọi `create_financial_transaction` với idempotency key; RPC insert transaction và cập nhật account balances atomic; map lỗi ownership/transfer/category thành thông báo thân thiện.
 

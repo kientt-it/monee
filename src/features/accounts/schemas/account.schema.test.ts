@@ -28,4 +28,12 @@ describe("account schemas", () => {
     expect(result.name).toBe("Tiền mặt");
     expect("currentBalance" in result).toBe(false);
   });
+
+  it("requires both credit limit and available credit for a card", () => {
+    const card = { ...metadata, type: "credit_card" as const, initialBalance: 0, creditLimit: 10_000_000, availableCredit: 7_000_000 };
+    expect(accountSchema.safeParse(card).success).toBe(true);
+    expect(accountEditSchema.safeParse(card).success).toBe(true);
+    expect(accountSchema.safeParse({ ...card, availableCredit: undefined }).success).toBe(false);
+    expect(accountSchema.safeParse({ ...card, availableCredit: 11_000_000 }).success).toBe(false);
+  });
 });

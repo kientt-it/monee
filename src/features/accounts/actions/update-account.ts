@@ -27,17 +27,19 @@ export async function updateAccountAction(id: string, input: unknown) {
   } = await supabase.auth.getUser();
   if (!user) return { ok: false as const, error: "Bạn cần đăng nhập để sửa tài khoản." };
 
-  const { error } = await supabase.rpc("update_financial_account", {
+  const { error } = await supabase.rpc("update_financial_account_v2", {
     p_account_id: parsed.data.id,
     p_name: parsed.data.account.name,
     p_type: parsed.data.account.type,
     p_initial_balance: parsed.data.account.initialBalance,
+    p_credit_limit: parsed.data.account.type === "credit_card" ? parsed.data.account.creditLimit : null,
+    p_available_credit: parsed.data.account.type === "credit_card" ? parsed.data.account.availableCredit : null,
     p_currency: parsed.data.account.currency,
     p_icon: parsed.data.account.icon ?? null,
     p_color: parsed.data.account.color ?? null,
     p_include_in_total: parsed.data.account.includeInTotal,
   });
-  if (error) return { ok: false as const, error: "Không thể cập nhật tài khoản lúc này." };
+  if (error) return { ok: false as const, error: error.message.includes("INVALID_AVAILABLE_CREDIT") || error.message.includes("INVALID_CREDIT_CARD_LIMIT") ? "Hạn mức hoặc khả dụng của thẻ không hợp lệ." : "Không thể cập nhật tài khoản lúc này." };
 
   revalidateAccountViews();
   return { ok: true as const };
