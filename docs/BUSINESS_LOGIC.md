@@ -13,7 +13,7 @@
 - Với thẻ tín dụng, `credit_limit` là hạn mức, `current_balance` là khả dụng hiện tại; `initial_balance` chỉ là số dư gốc để tính lại lịch sử giao dịch. Mỗi thẻ có đúng một khoản loại `credit_card_repayment`, số còn phải trả = `max(0, credit_limit - current_balance)`. Khoản này không có ngày trả, không cho sửa/xóa thủ công và luôn hiện dù đang lọc theo ngày. Chưa tính kỳ sao kê/lãi.
 - Ghi nhận trả một phần qua khoản cần trả tạo giao dịch transfer từ tài khoản nguồn vào thẻ. Tiền nguồn giảm, hạn mức còn lại tăng, khoản còn phải trả giảm trong cùng một database transaction. Transfer không tính là thu nhập/chi tiêu.
 - Saving goal có contribution history; cached current_amount phải đồng bộ với contributions.
-- Khoản cần trả thông thường gồm tên, số tiền, ngày cần trả, ghi chú và ngày ghi nhận đã trả. Lọc theo khoảng ngày bao gồm cả ngày bắt đầu và kết thúc; bỏ trống cả hai để xem tất cả. Khoản hoàn trả thẻ tín dụng không chịu bộ lọc ngày.
+- Khoản cần trả thông thường gồm tên, số tiền, ngày cần trả, ghi chú và ngày ghi nhận đã trả. Có hai bộ lọc loại: khoản không phải thẻ tín dụng và khoản hoàn trả thẻ tín dụng. Khoản thường lọc theo khoảng ngày bao gồm cả ngày bắt đầu và kết thúc; khoản thẻ được xem riêng, không có bộ lọc ngày.
 - Quá hạn là khoản chưa trả có ngày cần trả trước hôm nay theo Việt Nam. Đánh dấu đã trả/hoàn tác không tạo transaction hay thay đổi balance.
 - Xóa hàng loạt chỉ xóa các mục thuộc user hiện tại; xóa là vĩnh viễn. Bảng khoản vay cũ được giữ trong database như dữ liệu lịch sử nhưng ứng dụng không đọc/ghi nữa.
 - Dữ liệu budgets cũ chỉ giữ lịch sử trong database, không còn được app đọc/ghi.

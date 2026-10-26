@@ -95,6 +95,7 @@ function CreditCardRepaymentDialog({ item, accounts, onClose, onPaid }: { item: 
 }
 
 export function PayablesView({ payables, accounts, available, today }: { payables: PayableRecord[]; accounts: AccountRecord[]; available: boolean; today: string }) {
+  const [filterKind, setFilterKind] = useState<"manual" | "credit_card_repayment">("manual");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [editor, setEditor] = useState<ManualPayableRecord | "new" | null>(null);
@@ -103,7 +104,8 @@ export function PayablesView({ payables, accounts, available, today }: { payable
   const [selected, setSelected] = useState<Set<string>>(() => new Set());
   const [deleting, setDeleting] = useState<string[] | null>(null);
   const [pending, startTransition] = useTransition();
-  const visible = filterPayables(payables, { fromDate, toDate });
+  const matchingKind = payables.filter((item) => item.kind === filterKind);
+  const visible = filterPayables(matchingKind, { fromDate, toDate });
   const summary = summarizePayables(visible, today);
   const selectable = visible.filter((item): item is ManualPayableRecord => item.kind === "manual");
   const selectedVisible = selectable.filter((item) => selected.has(item.id)).map((item) => item.id);
@@ -134,8 +136,11 @@ export function PayablesView({ payables, accounts, available, today }: { payable
   return <main className="min-w-0 px-4 pb-[calc(env(safe-area-inset-bottom)+7rem)] pt-5 sm:px-6 md:px-10 md:pb-12 md:pt-8"><div className="mx-auto max-w-[900px]">
     <header className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-sm text-[var(--muted)]">Theo dõi các khoản sắp đến hạn</p><h1 className="mt-1 text-2xl font-bold md:text-3xl">Khoản cần trả</h1></div><Button size="sm" disabled={!available || pending} onClick={() => setEditor("new")}><Plus size={17} /> Thêm khoản cần trả</Button></header>
     {!available ? <Card className="mt-6 p-6"><p className="font-semibold">Khoản cần trả chưa sẵn sàng</p><p className="mt-2 text-sm text-[var(--muted)]">Tính năng đang chờ cập nhật dữ liệu. Bạn vẫn có thể sử dụng các mục khác.</p></Card> : <>
-      <div className="mt-6"><DateRangePicker range={{ fromDate, toDate }} today={today} onChange={(next) => { setFromDate(next.fromDate); setToDate(next.toDate); setSelected(new Set()); setSelecting(false); }} /></div>
-      <p className="mt-2 text-xs text-[var(--muted)]">Khoản hoàn trả thẻ tín dụng luôn hiển thị vì không có ngày trả.</p>
+      <div role="group" aria-label="Lọc theo loại khoản cần trả" className="mt-6 grid grid-cols-2 gap-1 rounded-2xl bg-[var(--surface-muted)] p-1 sm:inline-grid sm:w-auto">
+        <button type="button" aria-pressed={filterKind === "manual"} onClick={() => { setFilterKind("manual"); setFromDate(""); setToDate(""); setSelected(new Set()); setSelecting(false); }} className={`min-h-11 rounded-xl px-3 py-2 text-sm font-semibold transition-colors ${filterKind === "manual" ? "bg-[var(--brand)] text-white shadow-sm" : "text-[var(--muted)] hover:text-[var(--foreground)]"}`}>Khoản không phải thẻ</button>
+        <button type="button" aria-pressed={filterKind === "credit_card_repayment"} onClick={() => { setFilterKind("credit_card_repayment"); setFromDate(""); setToDate(""); setSelected(new Set()); setSelecting(false); }} className={`min-h-11 rounded-xl px-3 py-2 text-sm font-semibold transition-colors ${filterKind === "credit_card_repayment" ? "bg-[var(--brand)] text-white shadow-sm" : "text-[var(--muted)] hover:text-[var(--foreground)]"}`}>Thẻ tín dụng</button>
+      </div>
+      {filterKind === "manual" ? <div className="mt-3"><DateRangePicker range={{ fromDate, toDate }} today={today} onChange={(next) => { setFromDate(next.fromDate); setToDate(next.toDate); setSelected(new Set()); setSelecting(false); }} /></div> : <p className="mt-3 text-xs text-[var(--muted)]">Khoản hoàn trả thẻ tín dụng không có ngày trả nên không áp dụng lọc ngày.</p>}
       <Card className="mt-5 bg-[var(--brand)] p-5 text-white sm:p-6"><p className="text-sm text-white/85">Còn cần trả</p><p className="mt-2 break-words text-3xl font-bold tabular-nums">{formatCurrency(summary.remaining)}</p><div className="mt-5 grid grid-cols-2 gap-4 border-t border-white/20 pt-4"><div><p className="text-sm text-white/85">Tổng hiển thị</p><p className="mt-1 font-semibold tabular-nums">{formatCurrency(summary.total)}</p></div><div><p className="text-sm text-white/85">Quá hạn chưa trả</p><p className="mt-1 font-semibold tabular-nums">{formatCurrency(summary.overdue)}</p></div></div></Card>
       <p className="mt-3 text-sm leading-6 text-[var(--muted)]">Khoản hoàn trả thẻ tín dụng không có ngày trả và không tính vào tổng tài sản. Ghi nhận số tiền đã trả sẽ chuyển tiền từ tài khoản nguồn vào thẻ. Với khoản thường, “Đã trả” chỉ cập nhật danh sách.</p>
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
@@ -158,10 +163,10 @@ export function PayablesView({ payables, accounts, available, today }: { payable
           </div>
         </div>
         <div className="mt-4 flex flex-wrap items-center justify-end gap-2 border-t border-[var(--border)] pt-3">{item.kind === "credit_card_repayment" ? <Button size="sm" variant="secondary" disabled={pending || item.amount === 0} onClick={() => setPaying(item)}><Check size={15} /> Ghi nhận đã trả</Button> : <><Button size="sm" variant={item.paidOn ? "outline" : "secondary"} disabled={pending} onClick={() => togglePaid(item)}>{item.paidOn ? <><RotateCcw size={15} /> Hoàn tác</> : <><Check size={15} /> Đã trả</>}</Button><Button size="sm" variant="ghost" disabled={pending} onClick={() => setEditor(item)} aria-label={`Sửa ${item.title}`}><Pencil size={16} /> Sửa</Button><Button size="sm" variant="ghost" disabled={pending} onClick={() => setDeleting([item.id])} aria-label={`Xóa ${item.title}`}><Trash2 size={16} /> Xóa</Button></>}</div>
-      </Card>; })}</div> : <Card className="p-8 text-center"><HandCoins size={30} className="mx-auto text-[var(--brand)]" /><h2 className="mt-3 font-semibold">Chưa có khoản cần trả</h2><p className="mt-2 text-sm text-[var(--muted)]">Thêm một khoản mới hoặc chọn khoảng ngày khác.</p><Button onClick={() => setEditor("new")} className="mt-5"><Plus size={16} /> Thêm khoản cần trả</Button></Card>}</section>
+      </Card>; })}</div> : <Card className="p-8 text-center"><HandCoins size={30} className="mx-auto text-[var(--brand)]" /><h2 className="mt-3 font-semibold">{filterKind === "manual" ? "Chưa có khoản cần trả" : "Chưa có khoản hoàn trả thẻ tín dụng"}</h2><p className="mt-2 text-sm text-[var(--muted)]">{filterKind === "manual" ? "Thêm một khoản mới hoặc chọn khoảng ngày khác." : "Thẻ tín dụng sẽ xuất hiện tại đây khi được thêm trong mục Tài khoản."}</p>{filterKind === "manual" && <Button onClick={() => setEditor("new")} className="mt-5"><Plus size={16} /> Thêm khoản cần trả</Button>}</Card>}</section>
     </>}
     {available && visible.length > 0 && <Button type="button" aria-label="Thêm khoản cần trả" disabled={pending} onClick={() => setEditor("new")} className="fixed bottom-[calc(env(safe-area-inset-bottom)+5.5rem)] right-4 z-20 h-14 w-14 rounded-full border-4 border-[var(--background)] p-0 shadow-xl md:hidden"><Plus size={24} /></Button>}
-    {editor && <PayableEditor key={editor === "new" ? "new" : editor.id} item={editor === "new" ? null : editor} today={today} onClose={() => setEditor(null)} onSaved={(dueDate) => { setEditor(null); setFromDate(dueDate); setToDate(dueDate); setSelected(new Set()); setSelecting(false); }} />}
+    {editor && <PayableEditor key={editor === "new" ? "new" : editor.id} item={editor === "new" ? null : editor} today={today} onClose={() => setEditor(null)} onSaved={(dueDate) => { setEditor(null); setFilterKind("manual"); setFromDate(dueDate); setToDate(dueDate); setSelected(new Set()); setSelecting(false); }} />}
     {paying && <CreditCardRepaymentDialog key={paying.id} item={paying} accounts={accounts} onClose={() => setPaying(null)} onPaid={() => setPaying(null)} />}
     {deleting && <DeleteConfirmation count={deleting.length} pending={pending} onCancel={() => setDeleting(null)} onConfirm={confirmDelete} />}
   </div></main>;
