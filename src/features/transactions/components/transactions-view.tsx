@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useTransition } from "react";
-import { ArrowLeftRight, ChevronLeft, ChevronRight, Coffee, Plus, WalletCards } from "lucide-react";
+import { useEffect, useRef, useState, useTransition } from "react";
+import { ArrowLeftRight, ChevronLeft, ChevronRight, Coffee, Plus, Trash2, WalletCards } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { restoreTransactionAction } from "@/features/transactions/actions/delete-transaction";
+import { deleteTransactionsAction, restoreTransactionAction } from "@/features/transactions/actions/delete-transaction";
 import type { TransactionRecord } from "@/features/transactions/queries/get-transactions";
 import { formatCurrency } from "@/lib/utils";
 
@@ -49,11 +49,52 @@ function UndoBanner({ deletedId }: { deletedId: string }) {
   return <div role="status" className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[var(--brand)]/25 bg-[var(--brand-soft)] px-4 py-3 text-sm"><div><p className="font-semibold text-[var(--brand-strong)]">Đã xóa giao dịch</p></div><Button variant="secondary" size="sm" onClick={restore} disabled={isPending}>{isPending ? "Đang khôi phục…" : "Hoàn tác"}</Button></div>;
 }
 
+function DeleteConfirmation({ count, pending, onCancel, onConfirm }: { count: number; pending: boolean; onCancel: () => void; onConfirm: () => void }) {
+  const dialog = useRef<HTMLDialogElement>(null);
+  useEffect(() => { dialog.current?.showModal(); }, []);
+  return <dialog ref={dialog} aria-labelledby="delete-transactions-title" onCancel={(event) => { event.preventDefault(); if (!pending) onCancel(); }} className="fixed inset-0 m-auto w-[calc(100%-2rem)] max-w-sm rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 text-[var(--foreground)] shadow-2xl backdrop:bg-black/40">
+    <h2 id="delete-transactions-title" className="text-lg font-bold">Xóa {count} giao dịch?</h2>
+    <p className="mt-2 text-sm leading-6 text-[var(--muted)]">Các giao dịch sẽ được chuyển vào trạng thái đã xóa và số dư liên quan được cập nhật cùng lúc.</p>
+    <div className="mt-6 flex justify-end gap-2"><Button variant="outline" disabled={pending} onClick={onCancel}>Hủy</Button><Button disabled={pending} onClick={onConfirm} className="bg-[var(--danger)] hover:brightness-90"><Trash2 size={16} /> {pending ? "Đang xóa…" : "Xóa"}</Button></div>
+  </dialog>;
+}
+
 export function TransactionsView({ transactions, configured, hasMore, page, deletedId, typeFilter, monthOnly }: { transactions: TransactionRecord[]; configured: boolean; hasMore: boolean; page: number; deletedId?: string; typeFilter: TypeFilter; monthOnly: boolean }) {
+  const router = useRouter();
+  const [selecting, setSelecting] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(() => new Set());
+  const [confirming, setConfirming] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const visible = (configured ? transactions : demoTransactions).filter((item) => typeFilter === "all" || item.type === typeFilter);
+  const selectedVisible = visible.filter((item) => selected.has(item.id)).map((item) => item.id);
+  const allSelected = visible.length > 0 && selectedVisible.length === visible.length;
   const monthTitle = new Intl.DateTimeFormat("vi-VN", { month: "long", year: "numeric" }).format(new Date());
   const countLabel = `${visible.length}${hasMore ? "+" : ""} giao dịch`;
   const filterClass = (selected: boolean) => selected ? "bg-[var(--brand)] text-white" : "border border-[var(--border)] bg-[var(--surface)] text-[var(--muted)]";
+
+  function toggleSelected(id: string) {
+    setSelected((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+
+  function confirmDelete() {
+    const ids = selectedVisible;
+    if (ids.length === 0) return;
+    startTransition(async () => {
+      try {
+        const result = await deleteTransactionsAction(ids);
+        if (!result.ok) { toast.error(result.error === "SUPABASE_NOT_CONFIGURED" ? "Bản xem trước không xóa dữ liệu thật." : result.error); return; }
+        setConfirming(false);
+        setSelected(new Set());
+        setSelecting(false);
+        toast.success(`Đã xóa ${result.count} giao dịch.`);
+        if (page > 1 && ids.length === visible.length) router.replace(filterHref(typeFilter, monthOnly, page - 1));
+      } catch { toast.error("Chưa xóa được giao dịch. Vui lòng thử lại."); }
+    });
+  }
 
   return <main className="min-h-screen bg-[var(--background)] px-4 pb-28 pt-5 sm:px-6 md:px-10 md:pb-12 md:pt-8">
     <div className="mx-auto max-w-[900px]">
@@ -66,10 +107,11 @@ export function TransactionsView({ transactions, configured, hasMore, page, dele
         <Link href={filterHref("income", monthOnly)} aria-current={typeFilter === "income" ? "page" : undefined} className={`min-h-10 shrink-0 rounded-full px-4 py-2 text-sm font-semibold ${filterClass(typeFilter === "income")}`}>Thu nhập</Link>
         <Link href={filterHref(typeFilter, true)} aria-current={monthOnly ? "page" : undefined} className={`min-h-10 shrink-0 rounded-full px-4 py-2 text-sm font-semibold ${filterClass(monthOnly)}`}>Tháng này</Link>
       </nav>
-      <Card className="mt-4"><CardHeader><div className="flex items-center justify-between"><CardTitle>{monthOnly ? monthTitle : "Giao dịch gần đây"}</CardTitle><span className="text-xs text-[var(--muted)]">{countLabel}</span></div></CardHeader><CardContent className="space-y-1 pt-2">
-        {visible.length === 0 ? <div className="py-8 text-center text-sm text-[var(--muted)]">Chưa có giao dịch trong khoảng thời gian này.</div> : visible.map((item) => { const Icon = icons[item.type]; const income = item.type === "income"; return <Link href={`/app/transactions/${item.id}`} key={item.id} className="flex items-center gap-3 rounded-xl py-3 hover:bg-[var(--surface-muted)]"><div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${income ? "bg-[var(--brand-soft)] text-[var(--brand)]" : "bg-[#fff1dc] text-[#b56f24]"}`}><Icon size={19} /></div><div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold">{item.merchant ?? "Giao dịch không tên"}</p><p className="mt-0.5 text-xs text-[var(--muted)]">{new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }).format(new Date(item.transaction_date))}</p></div><p className={`text-sm font-bold tabular-nums ${income ? "text-[var(--brand)]" : "text-[var(--foreground)]"}`}>{income ? "+" : "−"}{formatCurrency(item.amount)}</p><ChevronRight size={16} className="text-[var(--muted)]" /></Link>; })}
+      <Card className="mt-4"><CardHeader><div className="flex flex-wrap items-center justify-between gap-3"><div><CardTitle>{monthOnly ? monthTitle : "Giao dịch gần đây"}</CardTitle><span className="mt-1 block text-xs text-[var(--muted)]">{countLabel}</span></div>{configured && visible.length > 0 && (!selecting ? <Button size="sm" variant="outline" onClick={() => setSelecting(true)}>Chọn</Button> : <div className="flex flex-wrap items-center gap-3"><label className="flex min-h-11 cursor-pointer items-center gap-2 text-sm"><input type="checkbox" checked={allSelected} disabled={isPending} onChange={() => setSelected(allSelected ? new Set() : new Set(visible.map((item) => item.id)))} className="h-4 w-4 accent-[var(--brand)]" /> Chọn tất cả</label>{selectedVisible.length > 0 && <Button size="sm" variant="outline" disabled={isPending} onClick={() => setConfirming(true)}><Trash2 size={16} /> Xóa đã chọn ({selectedVisible.length})</Button>}<button type="button" disabled={isPending} onClick={() => { setSelected(new Set()); setSelecting(false); }} className="min-h-11 text-sm font-semibold text-[var(--muted)] disabled:opacity-50">Hủy chọn</button></div>)}</div></CardHeader><CardContent className="space-y-1 pt-2">
+        {visible.length === 0 ? <div className="py-8 text-center text-sm text-[var(--muted)]">Chưa có giao dịch trong khoảng thời gian này.</div> : visible.map((item) => { const Icon = icons[item.type]; const income = item.type === "income"; const row = <><div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${income ? "bg-[var(--brand-soft)] text-[var(--brand)]" : "bg-[#fff1dc] text-[#b56f24]"}`}><Icon size={19} /></div><div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold">{item.merchant ?? "Giao dịch không tên"}</p><p className="mt-0.5 text-xs text-[var(--muted)]">{new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }).format(new Date(item.transaction_date))}</p></div><p className={`shrink-0 text-sm font-bold tabular-nums ${income ? "text-[var(--brand)]" : "text-[var(--foreground)]"}`}>{income ? "+" : "−"}{formatCurrency(item.amount)}</p>{!selecting && <ChevronRight size={16} className="shrink-0 text-[var(--muted)]" />}</>; return <div key={item.id} className="flex min-w-0 items-center gap-3">{selecting && <input type="checkbox" aria-label={`Chọn ${item.merchant ?? "giao dịch không tên"}`} checked={selected.has(item.id)} onChange={() => toggleSelected(item.id)} disabled={isPending} className="h-4 w-4 shrink-0 accent-[var(--brand)]" />}{selecting ? <button type="button" onClick={() => toggleSelected(item.id)} disabled={isPending} aria-pressed={selected.has(item.id)} className="flex min-w-0 flex-1 items-center gap-3 rounded-xl py-3 text-left hover:bg-[var(--surface-muted)] disabled:opacity-50">{row}</button> : <Link href={`/app/transactions/${item.id}`} className="flex min-w-0 flex-1 items-center gap-3 rounded-xl py-3 hover:bg-[var(--surface-muted)]">{row}</Link>}</div>; })}
       </CardContent></Card>
       {(page > 1 || hasMore) && <nav aria-label="Phân trang giao dịch" className="mt-4 flex items-center justify-between"><div>{page > 1 && <Link href={filterHref(typeFilter, monthOnly, page - 1)}><Button variant="outline" size="sm"><ChevronLeft size={15} /> Trang trước</Button></Link>}</div><span className="text-xs text-[var(--muted)]">Trang {page}</span><div>{hasMore && <Link href={filterHref(typeFilter, monthOnly, page + 1)}><Button variant="outline" size="sm">Trang sau <ChevronRight size={15} /></Button></Link>}</div></nav>}
+      {confirming && <DeleteConfirmation count={selectedVisible.length} pending={isPending} onCancel={() => setConfirming(false)} onConfirm={confirmDelete} />}
     </div>
   </main>;
 }

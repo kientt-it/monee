@@ -9,6 +9,7 @@ Active migrations:
 - `supabase/migrations/202609100900_monthly_loans.sql` (cần apply trên Supabase để bật Khoản vay)
 - `supabase/migrations/202609101200_edit_account_initial_balance.sql` (cần apply trên Supabase để sửa Số dư ban đầu)
 - `supabase/migrations/202610261200_payables.sql` (cần apply để bật Khoản cần trả)
+- `supabase/migrations/202610261300_bulk_delete_transactions.sql` (cần apply để xóa nhiều giao dịch)
 
 Hai migration đã được người dùng apply lên Supabase dev ngày 2026-09-09. Kết nối Auth endpoint từ workspace phản hồi thành công; kiểm thử tích hợp bằng authenticated test user vẫn là follow-up.
 
@@ -24,6 +25,8 @@ Tất cả bảng dữ liệu user bật RLS. Policy giới hạn theo `auth.uid
 `create_financial_transaction` validate ownership/type/amount/category, lock accounts, insert transaction và cập nhật balance trong một transaction DB; hỗ trợ idempotency key.
 
 `update_financial_transaction` lock record/accounts, reverse effect cũ, apply effect mới và update record atomic. `soft_delete_financial_transaction` reverse effect rồi set `deleted_at`; `restore_financial_transaction` apply lại effect. `recalculate_account_balance` sửa cached balance theo lịch sử.
+
+`soft_delete_financial_transactions` gọi RPC xóa mềm hiện có cho tối đa 50 UUID trong cùng một database transaction; lỗi ownership sẽ rollback toàn bộ lần xóa.
 
 `create_financial_account` buộc `current_balance = initial_balance`, validate owner/name/currency và là đường tạo account duy nhất từ client.
 

@@ -28,6 +28,7 @@ Version 0.20.2. Foundation, onboarding/profile, Accounts, Transactions, Khoản 
 ## Recently completed
 2026-09-10: Sửa ô ngày mobile và thay Ngân sách bằng Khoản vay hằng tháng. Không thêm cron; migration mới cần apply trước khi dùng live.
 2026-10-26: Thay Khoản vay bằng Khoản cần trả độc lập. Cần apply migration `202610261200_payables.sql` trước khi dùng live.
+2026-10-26: Giao dịch có chế độ Chọn và xóa hàng loạt; cần apply migration `202610261300_bulk_delete_transactions.sql` trước khi dùng live.
 
 ## Next priorities
 1. Thêm integration tests có user test cho RPC rollback/ownership/idempotency và auth critical flows.

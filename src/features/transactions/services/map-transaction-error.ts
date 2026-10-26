@@ -5,5 +5,6 @@ export function mapTransactionError(message: string) {
   if (message.includes("INVALID_AMOUNT")) return "Số tiền phải lớn hơn 0.";
   if (message.includes("TRANSACTION_NOT_FOUND")) return "Không tìm thấy giao dịch.";
   if (message.includes("TRANSACTION_DELETED")) return "Giao dịch này đã bị xóa.";
+  if (message.includes("INVALID_TRANSACTION_IDS")) return "Danh sách giao dịch không hợp lệ.";
   return "Không thể cập nhật giao dịch lúc này.";
 }

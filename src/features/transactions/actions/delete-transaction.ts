@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getSupabaseConfig } from "@/lib/supabase/env";
 
 const idSchema = z.string().uuid();
+const idsSchema = z.array(idSchema).min(1).max(50).refine((ids) => new Set(ids).size === ids.length);
 
 async function runTransactionRpc(functionName: "soft_delete_financial_transaction" | "restore_financial_transaction", id: string) {
   if (!getSupabaseConfig().configured) return { ok: false as const, error: "SUPABASE_NOT_CONFIGURED" };
@@ -22,3 +23,17 @@ async function runTransactionRpc(functionName: "soft_delete_financial_transactio
 
 export async function deleteTransactionAction(id: string) { return runTransactionRpc("soft_delete_financial_transaction", id); }
 export async function restoreTransactionAction(id: string) { return runTransactionRpc("restore_financial_transaction", id); }
+
+export async function deleteTransactionsAction(ids: string[]) {
+  if (!getSupabaseConfig().configured) return { ok: false as const, error: "SUPABASE_NOT_CONFIGURED" };
+  const parsed = idsSchema.safeParse(ids);
+  if (!parsed.success) return { ok: false as const, error: "Danh sách giao dịch không hợp lệ." };
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false as const, error: "Bạn cần đăng nhập để xóa giao dịch." };
+  const { data, error } = await supabase.rpc("soft_delete_financial_transactions", { p_ids: parsed.data });
+  if (error) return { ok: false as const, error: mapTransactionError(error.message) };
+  revalidatePath("/app/transactions");
+  revalidatePath("/app");
+  return { ok: true as const, count: data as number };
+}

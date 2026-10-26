@@ -8,5 +8,5 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
   const parsedPage = Number.parseInt(params.page ?? "1", 10);
   const page = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1;
   const result = await getTransactions({ type: typeFilter, monthOnly, page });
-  return <TransactionsView transactions={result.transactions} configured={result.configured} hasMore={result.hasMore ?? false} page={result.page ?? page} deletedId={params.deleted} typeFilter={typeFilter ?? "all"} monthOnly={monthOnly} />;
+  return <TransactionsView key={`${typeFilter ?? "all"}-${monthOnly}-${result.page ?? page}`} transactions={result.transactions} configured={result.configured} hasMore={result.hasMore ?? false} page={result.page ?? page} deletedId={params.deleted} typeFilter={typeFilter ?? "all"} monthOnly={monthOnly} />;
 }

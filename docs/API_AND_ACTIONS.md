@@ -18,6 +18,8 @@ Server Actions cho CRUD sẽ validate bằng Zod, gọi service/domain layer, ma
 
 `deleteTransactionAction(id)` — authenticated; gọi `soft_delete_financial_transaction`, reverse balance effect và set `deleted_at`. `restoreTransactionAction(id)` gọi RPC restore tương ứng.
 
+`deleteTransactionsAction(ids)` — authenticated; validate tối đa 50 UUID trên trang hiện tại, gọi `soft_delete_financial_transactions` để xóa mềm nhiều giao dịch và cập nhật số dư trong một database transaction. Cần apply migration `202610261300_bulk_delete_transactions.sql`.
+
 Không còn API/action cho recurring; migration cleanup dừng cron scheduler và gỡ các RPC service-role không còn sử dụng.
 
 `savePayableAction(id, input)` — authenticated + Zod; thêm/sửa khoản cần trả qua RLS. `setPayablePaidAction(id, paid)` ghi nhận/hoàn tác trạng thái đã trả, không tạo giao dịch tài chính.
