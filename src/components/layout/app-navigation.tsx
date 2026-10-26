@@ -8,7 +8,7 @@ const items = [
   ["Tổng quan", "/app"],
   ["Tài khoản", "/app/accounts"],
   ["Giao dịch", "/app/transactions"],
-  ["Khoản vay", "/app/loans"],
+  ["Khoản cần trả", "/app/payables"],
   ["Mục tiêu", "/app/goals"],
   ["Báo cáo", "/app/reports"],
   ["Thông báo", "/app/notifications"],

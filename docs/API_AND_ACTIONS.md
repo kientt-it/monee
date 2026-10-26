@@ -20,8 +20,6 @@ Server Actions cho CRUD sẽ validate bằng Zod, gọi service/domain layer, ma
 
 Không còn API/action cho recurring; migration cleanup dừng cron scheduler và gỡ các RPC service-role không còn sử dụng.
 
-`saveLoanAction(id, input)` — authenticated + Zod; gọi `save_monthly_loan` với UUID ổn định cho create retry. Lịch/số tiền không được sửa sau khi có payment.
+`savePayableAction(id, input)` — authenticated + Zod; thêm/sửa khoản cần trả qua RLS. `setPayablePaidAction(id, paid)` ghi nhận/hoàn tác trạng thái đã trả, không tạo giao dịch tài chính.
 
-`setLoanPaymentAction({loanId, installmentNumber, paid})` — gọi `set_monthly_loan_payment`; khóa loan, kiểm tra owner/term/archived và ghi nhận/hoàn tác kỳ đóng idempotent. Không tạo transaction.
-
-`setLoanArchivedAction(id, archived)` — archive/restore bằng RPC, giữ payment history. Các action revalidate `/app/loans` và `/app` ngay trong phản hồi, không gọi thêm client refresh.
+`deletePayablesAction(ids)` — validate UUID, gọi RPC `delete_payables` để xóa nhiều mục của user trong một lệnh database. Các action revalidate `/app/payables` và `/app`.

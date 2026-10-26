@@ -10,7 +10,7 @@ type NavItem = "home" | "transactions" | "reports";
 
 const moreItems = [
   ["Tài khoản", "/app/accounts"],
-  ["Khoản vay", "/app/loans"],
+  ["Khoản cần trả", "/app/payables"],
   ["Mục tiêu", "/app/goals"],
   ["Thông báo", "/app/notifications"],
   ["Cá nhân", "/app/settings/profile"],

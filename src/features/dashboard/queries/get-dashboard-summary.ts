@@ -7,8 +7,8 @@ import {
 import { getSupabaseAuthContext } from "@/lib/supabase/auth-context";
 import { getCurrentProfile } from "@/features/profile/queries/get-current-profile";
 import type { DashboardSummary } from "@/features/dashboard/types";
-import { getLoans } from "@/features/loans/queries/get-loans";
-import { summarizeLoans } from "@/features/loans/schedule";
+import { getPayables } from "@/features/payables/queries/get-payables";
+import { filterPayables, summarizePayables } from "@/features/payables/filter";
 import { localToday } from "@/lib/date";
 
 const TIMEZONE = "Asia/Ho_Chi_Minh";
@@ -101,12 +101,12 @@ export async function getDashboardSummary(): Promise<DashboardSummary> {
 
   const now = new Date();
   const month = getMonthWindow(now);
-  const [accountsResult, monthTransactionsResult, recentTransactionsResult, categoriesResult, loansResult, goalsResult, notificationResult] = await Promise.all([
+  const [accountsResult, monthTransactionsResult, recentTransactionsResult, categoriesResult, payablesResult, goalsResult, notificationResult] = await Promise.all([
     supabase.from("accounts").select("id,name,current_balance,is_archived,include_in_total").eq("user_id", user.id),
     supabase.from("transactions").select("type,amount,transaction_date,category_id").eq("user_id", user.id).is("deleted_at", null).gte("transaction_date", month.start).lt("transaction_date", month.end).order("transaction_date", { ascending: false }),
     supabase.from("transactions").select("id,type,amount,merchant,note,transaction_date,account_id,destination_account_id,category_id").eq("user_id", user.id).is("deleted_at", null).order("transaction_date", { ascending: false }).limit(5),
     supabase.from("categories").select("id,name,color").or(`user_id.is.null,user_id.eq.${user.id}`).eq("is_archived", false),
-    getLoans(),
+    getPayables(),
     supabase.from("saving_goals").select("id,name,target_amount,current_amount,color,icon").eq("user_id", user.id).eq("status", "active").order("created_at", { ascending: true }).limit(3),
     supabase.from("notifications").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("is_read", false),
   ]);
@@ -162,7 +162,7 @@ export async function getDashboardSummary(): Promise<DashboardSummary> {
     monthlyExpense,
     netCashFlow: calculateNetCashFlow(normalizedTransactions),
     savingRate: calculateSavingRate(normalizedTransactions),
-    loans: loansResult.available ? summarizeLoans(loansResult.loans, month.firstDate.slice(0, 7), localToday(now)) : null,
+    payables: payablesResult.available ? summarizePayables(filterPayables(payablesResult.payables, { mode: "month", value: month.firstDate.slice(0, 7) }), localToday(now)) : null,
     spending,
     recentTransactions: recentTransactions.map((transaction) => {
       const category = transaction.category_id ? categoryMap.get(transaction.category_id) : null;

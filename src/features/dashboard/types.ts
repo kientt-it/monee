@@ -1,4 +1,4 @@
-import type { LoanSummary } from "@/features/loans/types";
+import type { PayableSummary } from "@/features/payables/types";
 
 export type DashboardSpendingCategory = {
   label: string;
@@ -35,7 +35,7 @@ export type DashboardSummary = {
   monthlyExpense: number;
   netCashFlow: number;
   savingRate: number;
-  loans: LoanSummary | null;
+  payables: PayableSummary | null;
   spending: DashboardSpendingCategory[];
   recentTransactions: DashboardTransaction[];
   goals: DashboardGoal[];

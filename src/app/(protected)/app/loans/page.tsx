@@ -1,8 +1,5 @@
-import { LoansView } from "@/features/loans/components/loans-view";
-import { getLoans } from "@/features/loans/queries/get-loans";
-import { localToday } from "@/lib/date";
+import { redirect } from "next/navigation";
 
-export default async function LoansPage() {
-  const data = await getLoans();
-  return <LoansView {...data} today={localToday()} />;
+export default function LoansPage() {
+  redirect("/app/payables");
 }

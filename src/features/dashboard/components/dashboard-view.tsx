@@ -76,19 +76,19 @@ export function DashboardView({ data }: { data: DashboardSummary }) {
                 <p className={`mt-1 text-lg font-bold tabular-nums ${dashboard.savingRate < 0 ? "text-[var(--danger)]" : ""}`}>{savingRate}%</p>
               </Card>
               <Card className="col-span-2 p-4 md:col-span-2">
-                {dashboard.loans && dashboard.loans.activeCount > 0 ? (
+                {dashboard.payables && dashboard.payables.count > 0 ? (
                   <>
                     <div className="flex items-center justify-between gap-4">
-                      <div><p className="text-sm text-[var(--muted)]">Khoản vay · Còn đóng tháng này</p><p className="mt-1 text-lg font-bold tabular-nums">{formatCurrency(dashboard.loans.remaining)}</p></div>
-                      <Link href="/app/loans" className="shrink-0 text-sm font-semibold text-[var(--brand)]">Xem lịch</Link>
+                      <div><p className="text-sm text-[var(--muted)]">Khoản cần trả · Tháng này</p><p className="mt-1 text-lg font-bold tabular-nums">{formatCurrency(dashboard.payables.remaining)}</p></div>
+                      <Link href="/app/payables" className="shrink-0 text-sm font-semibold text-[var(--brand)]">Xem danh sách</Link>
                     </div>
-                    <p className="mt-3 text-sm text-[var(--muted)]">Đã đóng {formatCurrency(dashboard.loans.paid)} / {formatCurrency(dashboard.loans.total)}</p>
-                    {dashboard.loans.overdue > 0 && <p className="mt-2 text-sm text-[var(--danger)]">Quá hạn chưa đóng: {formatCurrency(dashboard.loans.overdue)}</p>}
+                    <p className="mt-3 text-sm text-[var(--muted)]">{dashboard.payables.pendingCount} khoản chưa trả trong tháng</p>
+                    {dashboard.payables.overdue > 0 && <p className="mt-2 text-sm text-[var(--danger)]">Quá hạn trong tháng: {formatCurrency(dashboard.payables.overdue)}</p>}
                   </>
                 ) : (
                   <div className="flex h-full items-center justify-between gap-4">
-                    <div><p className="text-sm text-[var(--muted)]">Khoản vay</p><p className="mt-1 font-semibold">{dashboard.loans ? "Chưa có khoản vay đang theo dõi" : "Đang chờ cập nhật"}</p></div>
-                    <Link href="/app/loans" className="shrink-0 text-sm font-semibold text-[var(--brand)]">Xem lịch</Link>
+                    <div><p className="text-sm text-[var(--muted)]">Khoản cần trả</p><p className="mt-1 font-semibold">{dashboard.payables ? "Chưa có khoản cần trả trong tháng" : "Đang chờ cập nhật"}</p></div>
+                    <Link href="/app/payables" className="shrink-0 text-sm font-semibold text-[var(--brand)]">Xem danh sách</Link>
                   </div>
                 )}
               </Card>

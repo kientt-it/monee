@@ -8,11 +8,12 @@ Active migrations:
 - `supabase/migrations/202609091500_remove_recurring_scheduler.sql`
 - `supabase/migrations/202609100900_monthly_loans.sql` (cần apply trên Supabase để bật Khoản vay)
 - `supabase/migrations/202609101200_edit_account_initial_balance.sql` (cần apply trên Supabase để sửa Số dư ban đầu)
+- `supabase/migrations/202610261200_payables.sql` (cần apply để bật Khoản cần trả)
 
 Hai migration đã được người dùng apply lên Supabase dev ngày 2026-09-09. Kết nối Auth endpoint từ workspace phản hồi thành công; kiểm thử tích hợp bằng authenticated test user vẫn là follow-up.
 
 ## Tables
-`profiles`, `accounts`, `categories`, `transactions`, `tags`, `transaction_tags`, `budgets`, `saving_goals`, `saving_goal_contributions`, `notifications`. Hai bảng recurring cũ được giữ lại để không làm mất dữ liệu lịch sử, nhưng không còn được ứng dụng đọc/ghi.
+`profiles`, `accounts`, `categories`, `transactions`, `tags`, `transaction_tags`, `payables`, `budgets`, `saving_goals`, `saving_goal_contributions`, `notifications`. Bảng `loans`, `loan_payments` và hai bảng recurring cũ được giữ lại để không làm mất dữ liệu lịch sử, nhưng không còn được ứng dụng đọc/ghi.
 
 Amounts dùng `bigint`; thời điểm dùng `timestamptz`; ngày mục tiêu/ngân sách dùng `date`. Account và dữ liệu user liên kết tới `auth.users` bằng `user_id`.
 
@@ -30,9 +31,9 @@ Tất cả bảng dữ liệu user bật RLS. Policy giới hạn theo `auth.uid
 
 Authenticated client chỉ được select transactions. Quyền insert/update/delete trực tiếp transactions và accounts đã bị revoke; metadata account chỉ update qua column grant, còn `initial_balance` và `current_balance` không thể ghi trực tiếp. Accounts edit dùng RPC; archive/restore dùng column grant metadata hiện có.
 
-Ngân sách đã được thay bằng Khoản vay; bảng `budgets` cũ giữ lịch sử, không còn được ứng dụng đọc/ghi.
+`/app/budgets` và `/app/loans` chuyển tới `/app/payables`. Bảng `budgets`, `loans`, `loan_payments` cũ giữ lịch sử, không còn được ứng dụng đọc/ghi.
 
-`loans` lưu số tiền VND cố định, ngày đóng đầu và số kỳ; `loan_payments` lưu kỳ đã đóng, amount snapshot, ngày ghi nhận theo Việt Nam. RLS chỉ cho owner SELECT; mọi mutation thông qua `save_monthly_loan`, `set_monthly_loan_archived`, `set_monthly_loan_payment`. Row locks cùng khóa duy nhất `(loan_id, installment_number)` bảo vệ retry và ngăn sửa lịch đã có payment. Các RPC không thay đổi accounts/transactions. Migration đã chạy thử trên PostgreSQL 16 tạm, chưa apply production.
+`payables` lưu từng khoản cần trả với amount BIGINT, due_date và paid_on. RLS giới hạn select/insert/update/delete theo `auth.uid()`; RPC `delete_payables(uuid[])` xóa hàng loạt của owner trong một lệnh. Migration và kiểm tra RLS đã chạy trên PostgreSQL 16 tạm, chưa apply lên Supabase.
 
 Migration `supabase/migrations/202609091200_saving_goal_contribution.sql` thêm RPC `add_saving_goal_contribution`, khóa goal, insert contribution và cập nhật `current_amount/status` atomic. Người triển khai cần apply migration này trước khi dùng nút thêm đóng góp.
 
