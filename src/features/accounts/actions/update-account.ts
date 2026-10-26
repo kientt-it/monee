@@ -13,6 +13,7 @@ function revalidateAccountViews() {
   revalidatePath("/app");
   revalidatePath("/app/accounts");
   revalidatePath("/app/transactions");
+  revalidatePath("/app/payables");
 }
 
 export async function updateAccountAction(id: string, input: unknown) {

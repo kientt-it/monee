@@ -29,6 +29,7 @@ Version 0.20.2. Foundation, onboarding/profile, Accounts, Transactions, Khoản 
 2026-09-10: Sửa ô ngày mobile và thay Ngân sách bằng Khoản vay hằng tháng. Không thêm cron; migration mới cần apply trước khi dùng live.
 2026-10-26: Thay Khoản vay bằng Khoản cần trả độc lập. Cần apply migration `202610261200_payables.sql` trước khi dùng live.
 2026-10-26: Giao dịch có chế độ Chọn và xóa hàng loạt; cần apply migration `202610261300_bulk_delete_transactions.sql` trước khi dùng live.
+2026-10-26: Mỗi thẻ tín dụng có một khoản hoàn trả không có ngày, tính theo hạn mức trừ hạn mức còn lại; trả một phần bằng transfer từ tài khoản nguồn. Cần apply migration `202610261400_credit_card_payables.sql` sau migration Khoản cần trả.
 
 ## Next priorities
 1. Thêm integration tests có user test cho RPC rollback/ownership/idempotency và auth critical flows.

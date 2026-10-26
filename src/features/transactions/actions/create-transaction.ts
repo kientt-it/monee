@@ -15,6 +15,6 @@ export async function createTransactionAction(input: unknown) {
   if (!user) return { ok: false as const, error: "Bạn cần đăng nhập để lưu giao dịch." };
   const { error } = await supabase.rpc("create_financial_transaction", { p_type: parsed.data.type, p_amount: parsed.data.amount, p_account_id: parsed.data.accountId, p_destination_account_id: parsed.data.destinationAccountId ?? null, p_category_id: parsed.data.categoryId ?? null, p_merchant: parsed.data.merchant ?? null, p_note: parsed.data.note ?? null, p_transaction_date: parsed.data.transactionDate.toISOString(), p_idempotency_key: crypto.randomUUID() });
   if (error) return { ok: false as const, error: mapTransactionError(error.message) };
-  revalidatePath("/app/transactions"); revalidatePath("/app");
+  revalidatePath("/app/transactions"); revalidatePath("/app/payables"); revalidatePath("/app");
   return { ok: true as const };
 }

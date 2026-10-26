@@ -17,7 +17,7 @@ async function runTransactionRpc(functionName: "soft_delete_financial_transactio
   if (!user) return { ok: false as const, error: "Bạn cần đăng nhập để cập nhật giao dịch." };
   const { error } = await supabase.rpc(functionName, { p_transaction_id: parsed.data });
   if (error) return { ok: false as const, error: mapTransactionError(error.message) };
-  revalidatePath("/app/transactions"); revalidatePath("/app");
+  revalidatePath("/app/transactions"); revalidatePath("/app/payables"); revalidatePath("/app");
   return { ok: true as const };
 }
 
@@ -34,6 +34,7 @@ export async function deleteTransactionsAction(ids: string[]) {
   const { data, error } = await supabase.rpc("soft_delete_financial_transactions", { p_ids: parsed.data });
   if (error) return { ok: false as const, error: mapTransactionError(error.message) };
   revalidatePath("/app/transactions");
+  revalidatePath("/app/payables");
   revalidatePath("/app");
   return { ok: true as const, count: data as number };
 }

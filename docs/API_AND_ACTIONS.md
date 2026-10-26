@@ -24,6 +24,8 @@ Không còn API/action cho recurring; migration cleanup dừng cron scheduler v�
 
 `savePayableAction(id, input)` — authenticated + Zod; thêm/sửa khoản cần trả qua RLS. `setPayablePaidAction(id, paid)` ghi nhận/hoàn tác trạng thái đã trả, không tạo giao dịch tài chính.
 
-`deletePayablesAction(ids)` — validate UUID, gọi RPC `delete_payables` để xóa nhiều mục của user trong một lệnh database. Các action revalidate `/app/payables` và `/app`.
+`deletePayablesAction(ids)` — validate UUID, gọi RPC `delete_payables` để xóa nhiều khoản thủ công của user trong một lệnh database. Khoản hoàn trả thẻ tín dụng không thể xóa thủ công. Các action revalidate `/app/payables` và `/app`.
+
+`payCreditCardAction({ cardId, sourceAccountId, amount })` — gọi RPC `pay_credit_card` để chuyển tiền từ tài khoản nguồn vào thẻ, giới hạn số trả không vượt khoản còn phải trả. Trigger tự tính lại khoản `credit_card_repayment`; action revalidate Tài khoản, Giao dịch, Khoản cần trả và Tổng quan.
 
 `deleteGoalAction(id)` — authenticated + UUID validation; xóa mục tiêu thuộc user qua RLS. Foreign key `ON DELETE CASCADE` xóa các đóng góp liên quan; action revalidate `/app/goals` và `/app`.

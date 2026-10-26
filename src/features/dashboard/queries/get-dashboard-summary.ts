@@ -29,6 +29,7 @@ type TransactionRow = {
 type AccountRow = {
   id: string;
   name: string;
+  type: string;
   current_balance: number | string;
   is_archived: boolean;
   include_in_total: boolean;
@@ -102,7 +103,7 @@ export async function getDashboardSummary(): Promise<DashboardSummary> {
   const now = new Date();
   const month = getMonthWindow(now);
   const [accountsResult, monthTransactionsResult, recentTransactionsResult, categoriesResult, payablesResult, goalsResult, notificationResult] = await Promise.all([
-    supabase.from("accounts").select("id,name,current_balance,is_archived,include_in_total").eq("user_id", user.id),
+    supabase.from("accounts").select("id,name,type,current_balance,is_archived,include_in_total").eq("user_id", user.id),
     supabase.from("transactions").select("type,amount,transaction_date,category_id").eq("user_id", user.id).is("deleted_at", null).gte("transaction_date", month.start).lt("transaction_date", month.end).order("transaction_date", { ascending: false }),
     supabase.from("transactions").select("id,type,amount,merchant,note,transaction_date,account_id,destination_account_id,category_id").eq("user_id", user.id).is("deleted_at", null).order("transaction_date", { ascending: false }).limit(5),
     supabase.from("categories").select("id,name,color").or(`user_id.is.null,user_id.eq.${user.id}`).eq("is_archived", false),
@@ -157,7 +158,7 @@ export async function getDashboardSummary(): Promise<DashboardSummary> {
     dateLabel: formatDateLabel(now),
     monthLabel: formatMonthLabel(now),
     currency: profile.currency,
-    totalBalance: calculateTotalBalance(accounts.map((account) => ({ currentBalance: toSafeAmount(account.current_balance), isArchived: account.is_archived, includeInTotal: account.include_in_total }))),
+    totalBalance: calculateTotalBalance(accounts.map((account) => ({ currentBalance: toSafeAmount(account.current_balance), isArchived: account.is_archived, includeInTotal: account.type !== "credit_card" && account.include_in_total }))),
     monthlyIncome,
     monthlyExpense,
     netCashFlow: calculateNetCashFlow(normalizedTransactions),

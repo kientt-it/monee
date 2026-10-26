@@ -5,9 +5,9 @@
 | Mobile dashboard | Implemented | `/app` đọc dữ liệu Supabase thật; `/` điều hướng vào luồng Auth, không còn dữ liệu mẫu |
 | App navigation | Implemented | Sidebar desktop và bottom navigation mobile dùng chung cho toàn bộ `/app/*`; mobile có menu “Khác” cho các màn phụ |
 | Auth + onboarding | Implemented core | Login/register/recovery, route protection, onboarding, profile, theme và sign-out; cần E2E |
-| Accounts | Implemented MVP core | Create/edit/archive/restore, include-in-total, lịch sử giữ account archived; delete vĩnh viễn không hỗ trợ |
+| Accounts | Implemented MVP core | Create/edit/archive/restore; với thẻ tín dụng, số dư ban đầu là hạn mức và thẻ không tính vào tổng tài sản; delete vĩnh viễn không hỗ trợ |
 | Transactions | Implemented MVP core | List/detail/create/edit/soft-delete/undo; nút Chọn, Chọn tất cả trang hiện tại và xóa nhiều giao dịch bằng RPC atomic; server-side type/month filters; pagination; cần migration `202610261300_bulk_delete_transactions.sql`; receipt planned |
-| Khoản cần trả | Implemented | `/app/payables`: thêm/sửa/xóa, chọn và xóa hàng loạt, lọc theo khoảng từ ngày đến ngày, đánh dấu đã trả/hoàn tác; cần migration `202610261200_payables.sql`. Chỉ theo dõi, không trừ số dư. |
+| Khoản cần trả | Implemented | Khoản thủ công: thêm/sửa/xóa, lọc ngày, đánh dấu đã trả. Mỗi thẻ tín dụng có một khoản hoàn trả không có ngày; trả một phần bằng transfer từ tài khoản nguồn và tính lại số còn phải trả. Cần migration `202610261200_payables.sql` và `202610261400_credit_card_payables.sql`. |
 | Reports | Implemented MVP core | `/app/reports`: week/month/year/custom, summary thu-chi-ròng-saving rate, top categories và trend chart |
 | Saving goals | Implemented MVP core | `/app/goals`: create/edit/delete, target date/account, progress, pause/resume và contribution history qua atomic RPC; xóa mục tiêu sẽ xóa lịch sử đóng góp liên quan |
 | Notifications | Implemented core | `/app/notifications`: list, unread state, mark one/all read |

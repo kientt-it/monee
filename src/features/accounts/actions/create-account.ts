@@ -15,6 +15,7 @@ export async function createAccountAction(input: unknown) {
   const { error } = await supabase.rpc("create_financial_account", { p_name: parsed.data.name, p_type: parsed.data.type, p_initial_balance: parsed.data.initialBalance, p_currency: parsed.data.currency, p_icon: parsed.data.icon ?? null, p_color: parsed.data.color ?? null, p_include_in_total: parsed.data.includeInTotal });
   if (error) return { ok: false as const, error: "Không thể tạo tài khoản lúc này." };
   revalidatePath("/app/accounts");
+  revalidatePath("/app/payables");
   revalidatePath("/app");
   return { ok: true as const };
 }

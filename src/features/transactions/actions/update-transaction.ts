@@ -19,6 +19,6 @@ export async function updateTransactionAction(id: string, input: unknown) {
   const transaction = parsed.data.transaction;
   const { error } = await supabase.rpc("update_financial_transaction", { p_transaction_id: parsed.data.id, p_type: transaction.type, p_amount: transaction.amount, p_account_id: transaction.accountId, p_destination_account_id: transaction.destinationAccountId ?? null, p_category_id: transaction.categoryId ?? null, p_merchant: transaction.merchant ?? null, p_note: transaction.note ?? null, p_transaction_date: transaction.transactionDate.toISOString() });
   if (error) return { ok: false as const, error: mapTransactionError(error.message) };
-  revalidatePath(`/app/transactions/${parsed.data.id}`); revalidatePath("/app/transactions"); revalidatePath("/app");
+  revalidatePath(`/app/transactions/${parsed.data.id}`); revalidatePath("/app/transactions"); revalidatePath("/app/payables"); revalidatePath("/app");
   return { ok: true as const };
 }

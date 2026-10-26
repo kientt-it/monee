@@ -79,15 +79,15 @@ export function DashboardView({ data }: { data: DashboardSummary }) {
                 {dashboard.payables && dashboard.payables.count > 0 ? (
                   <>
                     <div className="flex items-center justify-between gap-4">
-                      <div><p className="text-sm text-[var(--muted)]">Khoản cần trả · Tháng này</p><p className="mt-1 text-lg font-bold tabular-nums">{formatCurrency(dashboard.payables.remaining)}</p></div>
+                      <div><p className="text-sm text-[var(--muted)]">Khoản cần trả</p><p className="mt-1 text-lg font-bold tabular-nums">{formatCurrency(dashboard.payables.remaining)}</p></div>
                       <Link href="/app/payables" className="shrink-0 text-sm font-semibold text-[var(--brand)]">Xem danh sách</Link>
                     </div>
-                    <p className="mt-3 text-sm text-[var(--muted)]">{dashboard.payables.pendingCount} khoản chưa trả trong tháng</p>
+                    <p className="mt-3 text-sm text-[var(--muted)]">{dashboard.payables.pendingCount} khoản chưa trả · gồm thẻ tín dụng và khoản đến hạn trong tháng</p>
                     {dashboard.payables.overdue > 0 && <p className="mt-2 text-sm text-[var(--danger)]">Quá hạn trong tháng: {formatCurrency(dashboard.payables.overdue)}</p>}
                   </>
                 ) : (
                   <div className="flex h-full items-center justify-between gap-4">
-                    <div><p className="text-sm text-[var(--muted)]">Khoản cần trả</p><p className="mt-1 font-semibold">{dashboard.payables ? "Chưa có khoản cần trả trong tháng" : "Đang chờ cập nhật"}</p></div>
+                    <div><p className="text-sm text-[var(--muted)]">Khoản cần trả</p><p className="mt-1 font-semibold">{dashboard.payables ? "Chưa có khoản cần trả" : "Đang chờ cập nhật"}</p></div>
                     <Link href="/app/payables" className="shrink-0 text-sm font-semibold text-[var(--brand)]">Xem danh sách</Link>
                   </div>
                 )}
