@@ -14,6 +14,7 @@
 - Ghi nhận trả một phần qua khoản cần trả tạo giao dịch transfer từ tài khoản nguồn vào thẻ. Tiền nguồn giảm, hạn mức còn lại tăng, khoản còn phải trả giảm trong cùng một database transaction. Transfer không tính là thu nhập/chi tiêu.
 - Saving goal có contribution history; cached current_amount phải đồng bộ với contributions.
 - Khoản cần trả thông thường gồm tên, số tiền, ngày cần trả, ghi chú và ngày ghi nhận đã trả. Có hai bộ lọc loại: khoản không phải thẻ tín dụng và khoản hoàn trả thẻ tín dụng. Khoản thường lọc theo khoảng ngày bao gồm cả ngày bắt đầu và kết thúc; khoản thẻ được xem riêng, không có bộ lọc ngày.
+- Tính hụi kiểu mức bỏ thấp nhất được hốt: mức bỏ không vượt giá mở hụi sống; chân đã hốt trước kỳ này góp mức hụi chết; chân chưa hốt góp mức bỏ thắng kỳ này. Tổng hụi tính cả phần người hốt = số chân đã hốt × mức hụi chết + số chân chưa hốt × mức bỏ. Tiền thực cầm = tổng hụi − phần góp của người hốt − tiền công chủ hụi. Người hốt tiếp tục góp mức hụi chết trong các kỳ còn lại. Máy tính này chỉ tính giả định, không ghi giao dịch.
 - Quá hạn là khoản chưa trả có ngày cần trả trước hôm nay theo Việt Nam. Đánh dấu đã trả/hoàn tác không tạo transaction hay thay đổi balance.
 - Xóa hàng loạt chỉ xóa các mục thuộc user hiện tại; xóa là vĩnh viễn. Bảng khoản vay cũ được giữ trong database như dữ liệu lịch sử nhưng ứng dụng không đọc/ghi nữa.
 - Dữ liệu budgets cũ chỉ giữ lịch sử trong database, không còn được app đọc/ghi.
