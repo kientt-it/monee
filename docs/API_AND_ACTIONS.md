@@ -23,3 +23,5 @@ Không còn API/action cho recurring; migration cleanup dừng cron scheduler v�
 `savePayableAction(id, input)` — authenticated + Zod; thêm/sửa khoản cần trả qua RLS. `setPayablePaidAction(id, paid)` ghi nhận/hoàn tác trạng thái đã trả, không tạo giao dịch tài chính.
 
 `deletePayablesAction(ids)` — validate UUID, gọi RPC `delete_payables` để xóa nhiều mục của user trong một lệnh database. Các action revalidate `/app/payables` và `/app`.
+
+`deleteGoalAction(id)` — authenticated + UUID validation; xóa mục tiêu thuộc user qua RLS. Foreign key `ON DELETE CASCADE` xóa các đóng góp liên quan; action revalidate `/app/goals` và `/app`.

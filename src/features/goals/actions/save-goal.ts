@@ -54,3 +54,14 @@ export async function setGoalStatusAction(id: string, status: "active" | "paused
   refreshGoalViews();
   return { ok: true as const };
 }
+
+export async function deleteGoalAction(id: string) {
+  if (!getSupabaseConfig().configured) return { ok: false as const, error: "SUPABASE_NOT_CONFIGURED" };
+  if (!idSchema.safeParse(id).success) return { ok: false as const, error: "Mục tiêu không hợp lệ." };
+  const { supabase, user } = await authClient();
+  if (!user) return { ok: false as const, error: "Bạn cần đăng nhập để xóa mục tiêu." };
+  const { data, error } = await supabase.from("saving_goals").delete().eq("id", id).eq("user_id", user.id).select("id").maybeSingle();
+  if (error || !data) return { ok: false as const, error: "Không thể xóa mục tiêu lúc này." };
+  refreshGoalViews();
+  return { ok: true as const };
+}
