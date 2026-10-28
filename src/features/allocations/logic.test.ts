@@ -37,6 +37,9 @@ describe("phân bổ theo tháng", () => {
     const saved = defaultAllocationLines([item], "2026-11-01");
     const paidEarlier = { ...item, paidTotal: 4_000_000, paidThroughMonth: 4_000_000 };
     expect(withNewInstallments(saved, [paidEarlier], "2026-11-01").find((line) => line.installmentId === item.id)?.amount).toBe(2_666_666);
+    const unpaidEarlier = { ...item, paidTotal: 1_000_000, paidThroughMonth: 1_000_000 };
+    expect(installmentDue(unpaidEarlier, "2026-11-01")).toBe(5_666_666);
+    expect(withNewInstallments(saved, [unpaidEarlier], "2026-11-01").find((line) => line.installmentId === item.id)?.amount).toBe(3_333_333);
   });
   it("giữ số đã trả trong tháng ở phân bổ và theo dõi số đã dùng", () => {
     const paidThisMonth = { ...item, paidTotal: 1_000_000, paidThroughMonth: 1_000_000, paidThisMonth: 1_000_000 };
@@ -44,12 +47,17 @@ describe("phân bổ theo tháng", () => {
     expect(installmentAllocationAmount(paidThisMonth, "2026-10-01")).toBe(3_333_333);
     expect(defaultAllocationLines([paidThisMonth], "2026-10-01").find((line) => line.installmentId === item.id)?.amount).toBe(3_333_333);
     const paidAhead = { ...item, paidTotal: 4_000_000, paidThroughMonth: 4_000_000, paidThisMonth: 4_000_000 };
-    expect(defaultAllocationLines([paidAhead], "2026-10-01").find((line) => line.installmentId === item.id)?.amount).toBe(4_000_000);
+    expect(defaultAllocationLines([paidAhead], "2026-10-01").find((line) => line.installmentId === item.id)?.amount).toBe(3_333_333);
   });
   it("không còn phân bổ kỳ đã được trả trước", () => {
     const paidEarlier = { ...item, paidTotal: 7_000_000, paidThroughMonth: 7_000_000 };
     const saved = defaultAllocationLines([item], "2026-11-01");
     expect(withNewInstallments(saved, [paidEarlier], "2026-11-01").find((line) => line.installmentId === item.id)?.amount).toBe(0);
+  });
+  it("không đưa nợ kỳ cũ vào phân bổ sau kỳ trả góp cuối", () => {
+    const latePayment = { ...item, paidTotal: 1_000_000, paidThroughMonth: 1_000_000, paidThisMonth: 500_000 };
+    expect(installmentAllocationAmount(latePayment, "2027-01-01")).toBe(0);
+    expect(defaultAllocationLines([latePayment], "2027-01-01").find((line) => line.installmentId === item.id)?.amount).toBe(0);
   });
   it("hiện khoản trả góp đến hạn nhưng không tự thêm mục hoàn trả thẻ khác", () => {
     const lines = defaultAllocationLines([item], "2026-10-01");

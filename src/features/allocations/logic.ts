@@ -63,19 +63,27 @@ export function monthIndex(month: string) {
   return year * 12 + value - 1;
 }
 
-export function installmentDue(installment: Installment, month: string) {
+function scheduledThroughMonth(installment: Installment, month: string) {
   const elapsed = monthIndex(month) - monthIndex(installment.startMonth) + 1;
   if (elapsed <= 0) return 0;
   const periods = Math.min(elapsed, installment.termMonths);
   const base = Math.floor(installment.principalAmount / installment.termMonths);
   const principal = periods === installment.termMonths ? installment.principalAmount : periods * base;
   const interest = interestPerPeriod(installment.principalAmount, installment.interestRateBps);
-  const scheduled = principal + (installment.interestMode === "upfront" ? interest : installment.interestMode === "monthly_flat" ? interest * periods : 0);
-  return Math.max(0, scheduled - installment.paidThroughMonth);
+  return principal + (installment.interestMode === "upfront" ? interest : installment.interestMode === "monthly_flat" ? interest * periods : 0);
+}
+
+export function installmentDue(installment: Installment, month: string) {
+  return Math.max(0, scheduledThroughMonth(installment, month) - installment.paidThroughMonth);
 }
 
 export function installmentAllocationAmount(installment: Installment, month: string) {
-  return installmentDue(installment, month) + installment.paidThisMonth;
+  const scheduledThisMonth = scheduledInstallmentAmount(installment, month);
+  const previousMonth = monthIndex(month) - 1;
+  const previousMonthDate = `${Math.floor(previousMonth / 12)}-${String(previousMonth % 12 + 1).padStart(2, "0")}-01`;
+  const paidBeforeMonth = installment.paidThroughMonth - installment.paidThisMonth;
+  const prepaid = Math.max(0, paidBeforeMonth - scheduledThroughMonth(installment, previousMonthDate));
+  return Math.max(0, scheduledThisMonth - prepaid);
 }
 
 export function scheduledInstallmentAmount(installment: Installment, month: string) {
@@ -92,7 +100,7 @@ export function defaultAllocationLines(installments: Installment[], month: strin
     { kind: "living", title: "Chi tiêu sinh hoạt", amount: 0, installmentId: null, creditAccountId: null, categoryId: null, goalId: null, payableId: null },
     { kind: "debt", title: "Trả nợ", amount: 0, installmentId: null, creditAccountId: null, categoryId: null, goalId: null, payableId: null },
     { kind: "reserve", title: "Dự phòng", amount: 0, installmentId: null, creditAccountId: null, categoryId: null, goalId: null, payableId: null },
-    ...installments.filter((item) => installmentAllocationAmount(item, month) > 0).map((item) => ({
+    ...installments.filter((item) => installmentAllocationAmount(item, month) > 0 || item.paidThisMonth > 0).map((item) => ({
       kind: "card_installment" as const, title: item.title, amount: installmentAllocationAmount(item, month),
       installmentId: item.id, creditAccountId: null, categoryId: null, goalId: null, payableId: null,
     })),
