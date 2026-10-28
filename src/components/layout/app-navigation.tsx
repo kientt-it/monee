@@ -9,6 +9,7 @@ const items = [
   ["Tài khoản", "/app/accounts"],
   ["Giao dịch", "/app/transactions"],
   ["Khoản cần trả", "/app/payables"],
+  ["Phân bổ thu nhập", "/app/allocations"],
   ["Tính hụi", "/app/hui"],
   ["Mục tiêu", "/app/goals"],
   ["Báo cáo", "/app/reports"],
