@@ -15,15 +15,26 @@ export type Installment = {
   creditAccountId: string;
   title: string;
   totalAmount: number;
+  principalAmount: number;
   termMonths: number;
   startMonth: string;
   dueDay: number;
+  interestMode: "none" | "upfront" | "monthly_flat";
+  interestRateBps: number;
   paidTotal: number;
   paidThroughMonth: number;
   paidThisMonth: number;
 };
 
-export type CreditCardForAllocation = { id: string; name: string; type: string; credit_limit?: number | null; current_balance: number };
+export function interestPerPeriod(principalAmount: number, interestRateBps: number) {
+  return Number((BigInt(principalAmount) * BigInt(interestRateBps) + BigInt(5000)) / BigInt(10000));
+}
+
+export function totalInstallmentAmount(principalAmount: number, termMonths: number, interestMode: Installment["interestMode"], interestRateBps: number) {
+  const interest = interestPerPeriod(principalAmount, interestRateBps);
+  return principalAmount + (interestMode === "upfront" ? interest : interestMode === "monthly_flat" ? interest * termMonths : 0);
+}
+
 export type AllocationActuals = {
   expensesByCategory: Record<string, number>;
   savingTransfers: number;
@@ -55,20 +66,24 @@ export function monthIndex(month: string) {
 export function installmentDue(installment: Installment, month: string) {
   const elapsed = monthIndex(month) - monthIndex(installment.startMonth) + 1;
   if (elapsed <= 0) return 0;
-  const base = Math.floor(installment.totalAmount / installment.termMonths);
-  const scheduled = Math.min(elapsed, installment.termMonths) === installment.termMonths
-    ? installment.totalAmount : Math.min(elapsed, installment.termMonths) * base;
+  const periods = Math.min(elapsed, installment.termMonths);
+  const base = Math.floor(installment.principalAmount / installment.termMonths);
+  const principal = periods === installment.termMonths ? installment.principalAmount : periods * base;
+  const interest = interestPerPeriod(installment.principalAmount, installment.interestRateBps);
+  const scheduled = principal + (installment.interestMode === "upfront" ? interest : installment.interestMode === "monthly_flat" ? interest * periods : 0);
   return Math.max(0, scheduled - installment.paidThroughMonth);
 }
 
 export function scheduledInstallmentAmount(installment: Installment, month: string) {
   const elapsed = monthIndex(month) - monthIndex(installment.startMonth) + 1;
   if (elapsed <= 0 || elapsed > installment.termMonths) return 0;
-  const base = Math.floor(installment.totalAmount / installment.termMonths);
-  return elapsed === installment.termMonths ? installment.totalAmount - base * (installment.termMonths - 1) : base;
+  const base = Math.floor(installment.principalAmount / installment.termMonths);
+  const principal = elapsed === installment.termMonths ? installment.principalAmount - base * (installment.termMonths - 1) : base;
+  const interest = interestPerPeriod(installment.principalAmount, installment.interestRateBps);
+  return principal + (installment.interestMode === "upfront" && elapsed === 1 ? interest : installment.interestMode === "monthly_flat" ? interest : 0);
 }
 
-export function defaultAllocationLines(installments: Installment[], month: string, cards: CreditCardForAllocation[] = []): AllocationLine[] {
+export function defaultAllocationLines(installments: Installment[], month: string): AllocationLine[] {
   return [
     { kind: "living", title: "Chi tiêu sinh hoạt", amount: 0, installmentId: null, creditAccountId: null, categoryId: null, goalId: null, payableId: null },
     { kind: "debt", title: "Trả nợ", amount: 0, installmentId: null, creditAccountId: null, categoryId: null, goalId: null, payableId: null },
@@ -77,16 +92,10 @@ export function defaultAllocationLines(installments: Installment[], month: strin
       kind: "card_installment" as const, title: item.title, amount: installmentDue(item, month),
       installmentId: item.id, creditAccountId: null, categoryId: null, goalId: null, payableId: null,
     })),
-    ...cards.filter((card) => card.type === "credit_card").map((card) => ({
-      kind: "card_repayment" as const, title: `Hoàn trả ${card.name}`, amount: 0,
-      installmentId: null, creditAccountId: card.id, categoryId: null, goalId: null, payableId: null,
-    })),
   ];
 }
 
-export function withNewInstallments(lines: AllocationLine[], installments: Installment[], month: string, cards: CreditCardForAllocation[] = []) {
+export function withNewInstallments(lines: AllocationLine[], installments: Installment[], month: string) {
   const existingInstallments = new Set(lines.filter((line) => line.installmentId).map((line) => line.installmentId));
-  const existingCards = new Set(lines.filter((line) => line.creditAccountId).map((line) => line.creditAccountId));
-  return [...lines, ...defaultAllocationLines(installments, month, cards).filter((line) =>
-    line.installmentId ? !existingInstallments.has(line.installmentId) : line.creditAccountId ? !existingCards.has(line.creditAccountId) : false)];
+  return [...lines, ...defaultAllocationLines(installments, month).filter((line) => line.installmentId && !existingInstallments.has(line.installmentId))];
 }

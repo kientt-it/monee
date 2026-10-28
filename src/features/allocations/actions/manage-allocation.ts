@@ -8,7 +8,7 @@ const monthSchema = z.iso.date().refine((value) => /^\d{4}-(0[1-9]|1[0-2])-01$/.
 const lineSchema = z.object({
   kind: z.enum(["living", "debt", "reserve", "custom", "card_installment", "card_repayment"]),
   title: z.string().trim().min(1).max(100),
-  amount: z.number().int().min(0).max(1_000_000_000_000),
+  amount: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER),
   installmentId: z.uuid().nullable(),
   creditAccountId: z.uuid().nullable(),
   categoryId: z.uuid().nullable(),
@@ -33,9 +33,13 @@ const planSchema = z.object({ month: monthSchema, plannedIncome: z.number().int(
 
 const installmentSchema = z.object({
   creditAccountId: z.uuid(), title: z.string().trim().min(1).max(100),
-  totalAmount: z.number().int().positive().max(1_000_000_000_000),
+  principalAmount: z.number().int().positive().max(1_000_000_000_000),
   termMonths: z.number().int().min(1).max(120), startMonth: monthSchema,
   dueDay: z.number().int().min(1).max(31),
+  interestMode: z.enum(["none", "upfront", "monthly_flat"]),
+  interestRateBps: z.number().int().min(0).max(10_000),
+}).superRefine((value, context) => {
+  if ((value.interestMode === "none") !== (value.interestRateBps === 0)) context.addIssue({ code: "custom", message: "Nhập lãi suất cho cách tính đã chọn." });
 });
 
 export async function saveAllocationAction(input: unknown) {
@@ -57,8 +61,9 @@ export async function saveInstallmentAction(id: string | null, input: unknown) {
   const value = parsed.data;
   const { data: card } = await supabase.from("accounts").select("id").eq("id", value.creditAccountId).eq("user_id", user.id).eq("type", "credit_card").maybeSingle();
   if (!card) return { ok: false as const, error: "Thẻ tín dụng không hợp lệ." };
-  const fields = { credit_account_id: value.creditAccountId, title: value.title, total_amount: value.totalAmount,
-    term_months: value.termMonths, start_month: value.startMonth, due_day: value.dueDay };
+  const fields = { credit_account_id: value.creditAccountId, title: value.title, principal_amount: value.principalAmount,
+    term_months: value.termMonths, start_month: value.startMonth, due_day: value.dueDay,
+    interest_mode: value.interestMode, interest_rate_bps: value.interestRateBps };
   const result = id
     ? await supabase.from("credit_card_installments").update(fields).eq("id", id).eq("user_id", user.id).select("id").maybeSingle()
     : await supabase.from("credit_card_installments").insert({ ...fields, user_id: user.id }).select("id").maybeSingle();
