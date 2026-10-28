@@ -74,6 +74,10 @@ export function installmentDue(installment: Installment, month: string) {
   return Math.max(0, scheduled - installment.paidThroughMonth);
 }
 
+export function installmentAllocationAmount(installment: Installment, month: string) {
+  return installmentDue(installment, month) + installment.paidThisMonth;
+}
+
 export function scheduledInstallmentAmount(installment: Installment, month: string) {
   const elapsed = monthIndex(month) - monthIndex(installment.startMonth) + 1;
   if (elapsed <= 0 || elapsed > installment.termMonths) return 0;
@@ -88,8 +92,8 @@ export function defaultAllocationLines(installments: Installment[], month: strin
     { kind: "living", title: "Chi tiêu sinh hoạt", amount: 0, installmentId: null, creditAccountId: null, categoryId: null, goalId: null, payableId: null },
     { kind: "debt", title: "Trả nợ", amount: 0, installmentId: null, creditAccountId: null, categoryId: null, goalId: null, payableId: null },
     { kind: "reserve", title: "Dự phòng", amount: 0, installmentId: null, creditAccountId: null, categoryId: null, goalId: null, payableId: null },
-    ...installments.filter((item) => installmentDue(item, month) > 0).map((item) => ({
-      kind: "card_installment" as const, title: item.title, amount: installmentDue(item, month),
+    ...installments.filter((item) => installmentAllocationAmount(item, month) > 0).map((item) => ({
+      kind: "card_installment" as const, title: item.title, amount: installmentAllocationAmount(item, month),
       installmentId: item.id, creditAccountId: null, categoryId: null, goalId: null, payableId: null,
     })),
   ];
@@ -97,5 +101,10 @@ export function defaultAllocationLines(installments: Installment[], month: strin
 
 export function withNewInstallments(lines: AllocationLine[], installments: Installment[], month: string) {
   const existingInstallments = new Set(lines.filter((line) => line.installmentId).map((line) => line.installmentId));
-  return [...lines, ...defaultAllocationLines(installments, month).filter((line) => line.installmentId && !existingInstallments.has(line.installmentId))];
+  const installmentById = new Map(installments.map((item) => [item.id, item]));
+  const updatedLines = lines.map((line) => {
+    const installment = line.installmentId ? installmentById.get(line.installmentId) : null;
+    return installment ? { ...line, title: installment.title, amount: installmentAllocationAmount(installment, month) } : line;
+  });
+  return [...updatedLines, ...defaultAllocationLines(installments, month).filter((line) => line.installmentId && !existingInstallments.has(line.installmentId))];
 }
