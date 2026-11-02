@@ -9,6 +9,7 @@
   --surface-muted: #eef2ee;
   --border: #e0e7e1;
   --brand: #087f5b;
+  --brand-contrast: #ffffff;
   --brand-strong: #056044;
   --brand-soft: #dff4e9;
   --danger: #b8524f;
@@ -30,6 +31,7 @@
   --surface-muted: #202c24;
   --border: #2d3b31;
   --brand: #54c99b;
+  --brand-contrast: #10251b;
   --brand-strong: #8fe0bb;
   --brand-soft: #203d30;
   --danger: #ed9183;

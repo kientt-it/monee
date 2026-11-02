@@ -1,5 +1,9 @@
 # Database
 
+## Bổ sung 02/11/2026 (chưa apply live)
+
+Migration `202611021600_repayment_workspace.sql` thêm `repayment_plans`, `repayment_dues`, `repayment_payments`, metadata nguồn và ngân sách theo mode; giữ nguyên dữ liệu legacy. Các bảng mới RLS owner-select, ghi chỉ qua RPC. Thu hồi đường ghi lịch cũ khi cutover. Chi tiết, giới hạn backfill payment và hướng dẫn staging nằm tại `changes/2026-11-02-repayment-workspace.md`. Danh sách legacy phía dưới mô tả trạng thái trước migration này.
+
 Active migrations:
 - `supabase/migrations/202609071600_initial_foundation.sql`
 - `supabase/migrations/202609071930_transaction_update_delete.sql`

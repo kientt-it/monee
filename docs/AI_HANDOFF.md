@@ -1,5 +1,9 @@
 # AI handoff
 
+## Update 02/11/2026 — repayment workspace
+
+Đã thêm `src/features/repayments` và migration `202611021600_repayment_workspace.sql`, **chưa apply live**. Khi bảng mới có sẵn, Tổng quan/Khoản trả dùng kỳ nghĩa vụ và phân bổ, `/app/allocations` redirect. Giữ fallback màn cũ trước migration. Xem `docs/changes/2026-11-02-repayment-workspace.md` trước tiếp tục: chưa có importer Excel/công cụ đối soát payment cũ; không tự đánh dấu lịch sử đã trả. Không xóa bảng legacy. `outputs/` là local-only đã được Git/TS/ESLint ignore. Test SQL chỉ chạy database tạm; không chạy harness trên Supabase.
+
 ## Current project state
 Version 0.20.2. Foundation, onboarding/profile, Accounts, Transactions, Khoản cần trả, Reports, Saving Goals và Notifications MVP core đã có bằng Next.js App Router + TypeScript strict + Tailwind. Supabase dev đã được kết nối; dashboard trong khu vực đăng nhập đọc dữ liệu thật. Khoản cần trả cần apply migration `202610261200_payables.sql`; sửa Số dư ban đầu cần apply thêm `202609101200_edit_account_initial_balance.sql` trên Supabase.
 

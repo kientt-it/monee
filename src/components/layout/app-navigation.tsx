@@ -2,17 +2,16 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { PiggyBank, Sparkles } from "lucide-react";
+import { PiggyBank } from "lucide-react";
 
 const items = [
   ["Tổng quan", "/app"],
-  ["Tài khoản", "/app/accounts"],
+  ["Khoản trả", "/app/payables"],
+  ["Ví & thẻ", "/app/accounts"],
   ["Giao dịch", "/app/transactions"],
-  ["Khoản cần trả", "/app/payables"],
-  ["Phân bổ thu nhập", "/app/allocations"],
-  ["Tính hụi", "/app/hui"],
   ["Mục tiêu", "/app/goals"],
   ["Báo cáo", "/app/reports"],
+  ["Công cụ", "/app/hui"],
   ["Thông báo", "/app/notifications"],
   ["Cá nhân", "/app/settings/profile"],
 ] as const;
@@ -33,6 +32,5 @@ export function AppNavigation() {
     <nav className="space-y-1" aria-label="Điều hướng desktop">
       {items.map(([label, path]) => <Link key={path} href={path} prefetch={false} {...prefetchOnIntent(path)} className={`flex min-h-11 items-center gap-2 rounded-xl px-3 text-sm font-semibold ${isActive(path) ? "bg-[var(--brand-soft)] text-[var(--brand-strong)]" : "text-[var(--muted)] hover:bg-[var(--surface-muted)]"}`}>{label}</Link>)}
     </nav>
-    <div className="pt-14"><div className="rounded-2xl bg-[var(--surface-muted)] p-4"><Sparkles size={19} className="mb-3 text-[var(--brand)]" /><p className="text-sm font-semibold">Monee đang cùng bạn</p><p className="mt-1 text-xs leading-5 text-[var(--muted)]">Ghi lại từng khoản nhỏ để hiểu hơn về thói quen của mình.</p></div></div>
   </aside>;
 }

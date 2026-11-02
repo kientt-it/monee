@@ -17,6 +17,9 @@
 /.next/
 /out/
 
+# Local deliverables and authoring dependencies; never commit or deploy.
+/outputs/
+
 # production
 /build
 

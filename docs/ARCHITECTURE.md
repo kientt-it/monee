@@ -1,5 +1,9 @@
 # Architecture
 
+## Lịch trả theo kỳ (02/11/2026)
+
+`src/features/repayments` chứa domain thuần, DAL server-only, Server Actions validate/authenticate và workspace React. Tổng quan/Khoản trả chuyển sang workspace khi migration `202611021600_repayment_workspace.sql` có sẵn; trước đó giữ đường đọc cũ. Bảng lịch và payment mới chỉ select qua RLS, mutation qua RPC atomic. Xem `changes/2026-11-02-repayment-workspace.md` cho phạm vi cutover và phần đối soát chưa triển khai. Các mô tả payables/allocations cũ bên dưới áp dụng trước cutover.
+
 ## Layout
 `src/app` chứa route và boundary; `src/features` chứa domain theo feature; `src/components` chứa UI/layout dùng chung; `src/lib/domain` chứa tính toán; `supabase/migrations` là source of truth schema; `docs` ghi lại quyết định.
 

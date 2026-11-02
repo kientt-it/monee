@@ -1,5 +1,9 @@
 # Testing
 
+## Lịch trả theo kỳ
+
+`src/features/repayments/domain.test.ts` kiểm thử các ranh giới lịch và ngân sách. Tổng suite hiện có 46 tests. `supabase/tests/repayment_workspace.sql` chỉ dùng trên PostgreSQL disposable trống, có Auth/Storage fixture và migration thực; tuyệt đối không chạy trên Supabase live. Chi tiết kiểm tra UI/build và giới hạn E2E xem `changes/2026-11-02-repayment-workspace.md`.
+
 Vitest được cấu hình bằng `npm run test`. Hiện có 25 tests cho balance effects, profile/account/goal schemas, report periods và lọc/tổng hợp khoản cần trả.
 
 `supabase/tests/monthly_loans.sql` là harness chỉ dùng trên database PostgreSQL trống, cô lập, không chạy trên Supabase. Đã pass PostgreSQL 16: migration chạy lại, RLS hai user, direct-write rejection, RPC ownership, idempotency, undo, archive, khóa lịch và rollback. Harness tự tạo Auth fixtures và role kiểm thử.

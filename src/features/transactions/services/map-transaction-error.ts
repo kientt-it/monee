@@ -1,4 +1,5 @@
 export function mapTransactionError(message: string) {
+  if (message.includes("TRANSACTION_HAS_REPAYMENTS")) return "Giao dịch đang được phân bổ vào kỳ trả. Bỏ phân bổ tại Khoản trả trước khi sửa hoặc xóa giao dịch.";
   if (message.includes("INVALID_TRANSFER_ACCOUNT")) return "Tài khoản nguồn và đích phải khác nhau.";
   if (message.includes("INVALID_ACCOUNT")) return "Tài khoản không hợp lệ.";
   if (message.includes("INVALID_CATEGORY")) return "Danh mục không hợp lệ.";

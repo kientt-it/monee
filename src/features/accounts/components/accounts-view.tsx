@@ -62,7 +62,7 @@ export function AccountsView({ accounts, configured }: { accounts: AccountRecord
 
   function openEditDialog(account: AccountRecord) {
     setEditingAccount(account);
-    editForm.reset({ name: account.name, type: account.type, initialBalance: account.initial_balance, creditLimit: account.type === "credit_card" ? account.credit_limit ?? account.initial_balance : undefined, availableCredit: account.type === "credit_card" ? account.current_balance : undefined, currency: "VND", color: account.color ?? "#087f5b", includeInTotal: account.include_in_total });
+    editForm.reset({ repaymentKind: account.repayment_kind, name: account.name, type: account.type, initialBalance: account.initial_balance, creditLimit: account.type === "credit_card" ? account.credit_limit ?? account.initial_balance : undefined, availableCredit: account.type === "credit_card" ? account.current_balance : undefined, currency: "VND", color: account.color ?? "#087f5b", includeInTotal: account.include_in_total });
     setDialog("edit");
   }
 
@@ -126,7 +126,7 @@ export function AccountsView({ accounts, configured }: { accounts: AccountRecord
     <main className="min-h-screen bg-[var(--background)] px-4 pb-28 pt-5 sm:px-6 md:px-10 md:pb-12 md:pt-8">
       <div className="mx-auto max-w-[900px]">
         <header className="flex items-center justify-between gap-4">
-          <div><p className="text-sm text-[var(--muted)]">Không gian của bạn</p><h1 className="mt-1 text-2xl font-bold tracking-tight md:text-3xl">Tài khoản</h1></div>
+          <div><p className="text-sm text-[var(--muted)]">Không gian của bạn</p><h1 className="mt-1 text-2xl font-bold tracking-tight md:text-3xl">Ví & thẻ</h1></div>
           <Button size="sm" onClick={openCreateDialog}><Plus size={16} /> Thêm tài khoản</Button>
         </header>
 
@@ -152,8 +152,8 @@ export function AccountsView({ accounts, configured }: { accounts: AccountRecord
                   <Card key={account.id} className="p-4">
                     <div className="flex items-center gap-3">
                       <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-white" style={{ background: account.color ?? "var(--brand)" }}><Icon size={19} /></div>
-                      <div className="min-w-0 flex-1"><p className="truncate font-semibold">{account.name}</p><p className="mt-0.5 flex items-center gap-1 text-xs text-[var(--muted)]">{typeLabels[account.type]} · {account.type !== "credit_card" && account.include_in_total ? <><Eye size={12} /> Có trong tổng</> : <><EyeOff size={12} /> Không tính tổng</>}</p>{account.type === "credit_card" && <p className="mt-1 text-xs text-[var(--muted)]">Hạn mức {formatCurrency(account.credit_limit ?? account.initial_balance)}</p>}</div>
-                      <div className="text-right"><p className="text-xs text-[var(--muted)]">{account.type === "credit_card" ? "Hạn mức còn lại" : "Số dư"}</p><p className="font-bold tabular-nums">{formatCurrency(account.current_balance)}</p><div className="mt-1 flex justify-end gap-1"><button type="button" aria-label={`Sửa ${account.name}`} onClick={() => openEditDialog(account)} className="flex h-9 w-9 items-center justify-center rounded-full text-[var(--muted)] hover:bg-[var(--surface-muted)]"><Pencil size={15} /></button><button type="button" aria-label={`Lưu trữ ${account.name}`} onClick={() => setConfirmingArchive(account)} className="flex h-9 w-9 items-center justify-center rounded-full text-[var(--muted)] hover:bg-[var(--surface-muted)]"><Archive size={15} /></button></div></div>
+                      <div className="min-w-0 flex-1"><p className="truncate font-semibold">{account.name}</p><p className="mt-0.5 flex items-center gap-1 text-xs text-[var(--muted)]">{account.type === "credit_card" && account.repayment_kind === "pay_later" ? "Trả sau" : typeLabels[account.type]} · {account.type !== "credit_card" && account.include_in_total ? <><Eye size={12} /> Có trong tổng</> : <><EyeOff size={12} /> Không tính tổng</>}</p>{account.type === "credit_card" && <p className="mt-1 text-xs text-[var(--muted)]">{account.repayment_kind === "pay_later" && !account.credit_limit ? "Chưa khai báo hạn mức" : `Hạn mức ${formatCurrency(account.credit_limit ?? account.initial_balance)}`}</p>}</div>
+                      <div className="text-right"><p className="text-xs text-[var(--muted)]">{account.type === "credit_card" && account.repayment_kind === "pay_later" && !account.credit_limit ? "Dư nợ" : account.type === "credit_card" ? "Hạn mức còn lại" : "Số dư"}</p><p className="font-bold tabular-nums">{formatCurrency(account.type === "credit_card" && account.repayment_kind === "pay_later" && !account.credit_limit ? Math.max(0, -account.current_balance) : account.current_balance)}</p><div className="mt-1 flex justify-end gap-1"><button type="button" aria-label={`Sửa ${account.name}`} onClick={() => openEditDialog(account)} className="flex h-9 w-9 items-center justify-center rounded-full text-[var(--muted)] hover:bg-[var(--surface-muted)]"><Pencil size={15} /></button><button type="button" aria-label={`Lưu trữ ${account.name}`} onClick={() => setConfirmingArchive(account)} className="flex h-9 w-9 items-center justify-center rounded-full text-[var(--muted)] hover:bg-[var(--surface-muted)]"><Archive size={15} /></button></div></div>
                     </div>
                   </Card>
                 );
@@ -168,7 +168,7 @@ export function AccountsView({ accounts, configured }: { accounts: AccountRecord
             <div className="space-y-2">
               {archivedAccounts.map((account) => {
                 const Icon = typeIcons[account.type];
-                return <Card key={account.id} className="p-4 opacity-75"><div className="flex items-center gap-3"><div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--surface-muted)] text-[var(--muted)]"><Icon size={17} /></div><div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold">{account.name}</p><p className="text-xs text-[var(--muted)]">{typeLabels[account.type]} · {formatCurrency(account.current_balance)}</p></div><Button type="button" variant="outline" size="sm" onClick={() => restoreAccount(account)} disabled={isPending}><ArchiveRestore size={14} /> Khôi phục</Button></div></Card>;
+                return <Card key={account.id} className="p-4 opacity-75"><div className="flex items-center gap-3"><div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--surface-muted)] text-[var(--muted)]"><Icon size={17} /></div><div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold">{account.name}</p><p className="text-xs text-[var(--muted)]">{account.type === "credit_card" && account.repayment_kind === "pay_later" ? "Trả sau" : typeLabels[account.type]} · {formatCurrency(account.current_balance)}</p></div><Button type="button" variant="outline" size="sm" onClick={() => restoreAccount(account)} disabled={isPending}><ArchiveRestore size={14} /> Khôi phục</Button></div></Card>;
               })}
             </div>
           </section>

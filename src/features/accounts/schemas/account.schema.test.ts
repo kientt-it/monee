@@ -36,4 +36,9 @@ describe("account schemas", () => {
     expect(accountSchema.safeParse({ ...card, availableCredit: undefined }).success).toBe(false);
     expect(accountSchema.safeParse({ ...card, availableCredit: 11_000_000 }).success).toBe(false);
   });
+  it("cho phép sửa nguồn trả sau chưa biết hạn mức, không nới điều kiện thẻ thường", () => {
+    const source = { ...metadata, type: "credit_card", initialBalance: -500000, creditLimit: 0, availableCredit: -500000 };
+    expect(accountEditSchema.safeParse(source).success).toBe(false);
+    expect(accountEditSchema.safeParse({ ...source, repaymentKind: "pay_later" }).success).toBe(true);
+  });
 });

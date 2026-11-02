@@ -10,6 +10,8 @@ Người dùng cá nhân trên điện thoại; tiền mặc định là VND, lo
 Next.js App Router, TypeScript strict, Tailwind CSS, shadcn/ui primitives, Supabase Auth/PostgreSQL/Storage, React Hook Form, Zod, Recharts, date-fns và Lucide.
 
 ## Current status
+
+02/11/2026: Đợt đầu workspace lịch trả theo kỳ đã được phát triển, chờ áp dụng migration trên staging/live và đối soát payment cũ. Xem `changes/2026-11-02-repayment-workspace.md`. Chưa hoàn tất import Excel, lịch tùy chỉnh, công cụ đối soát legacy hoặc dọn bảng.
 Version 0.20.2. Supabase đã kết nối; Auth/profile, Accounts, Transactions, Khoản cần trả, Reports, Goals và Notifications đã có. Khoản cần trả thay Khoản vay, cần migration `202610261200_payables.sql`; dữ liệu budget/loan cũ giữ nguyên. Sửa tài khoản cho phép điều chỉnh số dư ban đầu qua RPC mà không làm thay đổi lịch sử giao dịch; cần apply thêm `202609101200_edit_account_initial_balance.sql`. Payables RLS/RPC có kiểm thử PostgreSQL cô lập; cần xác minh live sau khi deploy. Recurring/scheduler đã được loại khỏi sản phẩm.
 
 ## Non-negotiables
