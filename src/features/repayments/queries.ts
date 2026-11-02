@@ -33,7 +33,7 @@ export async function getRepaymentData(month: string, mode: "month" | "salary" =
   try { plans = await rows("repayment_plans", "id,title,kind,account_id"); }
   catch (e) { if (["42P01", "PGRST205"].includes((e as { code?: string }).code ?? "")) return empty; throw e; }
   const [dues, payments, accountData, budget, transactionResult, legacyResult] = await Promise.all([
-    rows("repayment_dues", "id,plan_id,period,due_date,amount,confirmed"),
+    rows("repayment_dues", "id,plan_id,period,due_date,amount,confirmed,title_override,deleted_at,revision"),
     rows("repayment_payments", "id,due_id,amount,paid_on,method,transaction_id,reversed_at"), getAccounts(),
     supabase.from("income_allocation_months").select("planned_income,opening_cash,living_budget,reserve_budget,salary_day,salary_opening_cash,salary_living_budget,salary_reserve_budget").eq("user_id", user.id).eq("month", `${month}-01`).maybeSingle(),
     supabase.from("transactions").select("id,type,amount,account_id,destination_account_id,transaction_date,merchant,note").eq("user_id", user.id).is("deleted_at", null).in("type", ["expense", "transfer"]).order("transaction_date", { ascending: false }).limit(100),
@@ -47,10 +47,10 @@ export async function getRepaymentData(month: string, mode: "month" | "salary" =
   for (const d of dues) terms.set(String(d.plan_id), Math.max(terms.get(String(d.plan_id)) ?? 0, Number(d.period)));
   const paid = new Map<string, number>();
   for (const p of pp) if (!p.reversed) paid.set(p.dueId, (paid.get(p.dueId) ?? 0) + p.amount);
-  const parsed: RepaymentDue[] = dues.map(d => {
+  const parsed: RepaymentDue[] = dues.filter(d => d.deleted_at === null).map(d => {
     const p = byPlan.get(String(d.plan_id));
     if (!p) throw new Error("Lịch trả thiếu thông tin hợp đồng.");
-    return { id: String(d.id), planId: String(p.id), title: String(p.title), kind: p.kind as RepaymentDue["kind"], accountId: p.account_id ? String(p.account_id) : null,
+    return { id: String(d.id), planId: String(p.id), title: String(d.title_override ?? p.title), revision: Number(d.revision), kind: p.kind as RepaymentDue["kind"], accountId: p.account_id ? String(p.account_id) : null,
       dueDate: String(d.due_date), amount: amount(d.amount), period: Number(d.period), terms: terms.get(String(p.id))!, confirmed: Boolean(d.confirmed), paid: paid.get(String(d.id)) ?? 0 };
   });
   const legacyIds = new Set((legacyResult.data ?? []).map(p => p.transaction_id));

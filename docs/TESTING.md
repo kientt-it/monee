@@ -1,5 +1,7 @@
 # Testing
 
+`supabase/tests/repayment_due_management.sql` bổ sung kiểm thử sửa/xóa kỳ trả và chạy lại harness workspace trên database disposable. Có kiểm tra paid guard, owner, revision, soft-delete và không đổi số dư. Không chạy trên Supabase live.
+
 ## Lịch trả theo kỳ
 
 `src/features/repayments/domain.test.ts` kiểm thử các ranh giới lịch và ngân sách. Tổng suite hiện có 46 tests. `supabase/tests/repayment_workspace.sql` chỉ dùng trên PostgreSQL disposable trống, có Auth/Storage fixture và migration thực; tuyệt đối không chạy trên Supabase live. Chi tiết kiểm tra UI/build và giới hạn E2E xem `changes/2026-11-02-repayment-workspace.md`.

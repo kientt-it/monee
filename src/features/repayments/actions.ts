@@ -19,13 +19,18 @@ const paymentSchema = z.object({ dueId: z.uuid(), amount: money.refine(v => v > 
 function refresh() { for (const path of ["/app", "/app/payables", "/app/allocations", "/app/accounts", "/app/transactions", "/app/reports"]) revalidatePath(path); }
 function errorMessage(message: string) {
   const errors: [string, string][] = [
+    ["DUE_HAS_PAYMENTS", "Kỳ này đã có thanh toán. Bỏ phân bổ trước khi sửa hoặc xóa; giao dịch tiền vẫn được giữ."],
+    ["DUE_CHANGED", "Khoản đã thay đổi ở phiên khác. Tải lại danh sách trước khi tiếp tục."],
+    ["DUE_DELETED", "Kỳ này đã được xóa khỏi lịch."],
+    ["DUE_NOT_FOUND", "Không tìm thấy khoản cần trả."],
+    ["INVALID_DUE", "Kiểm tra tên, ngày đến hạn và số tiền."],
     ["INSUFFICIENT_PAYMENT_FUNDS", "Tài khoản nguồn chưa đủ tiền để thanh toán."],
     ["PAYMENT_EXCEEDS_DUE", "Số tiền vượt phần còn thiếu. Hãy tải lại lịch trả."],
     ["PAYMENT_EXCEEDS_TRANSACTION", "Giao dịch không còn đủ tiền chưa phân bổ."],
     ["PAYMENT_EXCEEDS_CARD_DEBT", "Số tiền vượt dư nợ đã đối soát của nguồn. Kiểm tra số dư thẻ trước khi trả."],
     ["REQUEST_CONFLICT", "Yêu cầu đã được dùng với nội dung khác. Đóng form rồi thử lại."],
     ["PAYMENT_DATE_MISMATCH", "Ngày trả phải khớp ngày của giao dịch liên kết."],
-    ["LEGACY_PAYMENT_UNRECONCILED", "Giao dịch đang thuộc lịch trả góp cũ, cần đối soát trước."],
+    ["LEGACY_PAYMENT_UNRECONCILED", "Khoản có liên kết thanh toán cũ, cần đối soát trước khi sửa, xóa hoặc phân bổ."],
     ["INVALID_PAYMENT", "Kiểm tra số tiền và ngày thực trả; không chọn ngày tương lai."],
     ["PAYMENT_REVERSED", "Khoản thanh toán đã được hoàn tác. Hãy tạo yêu cầu mới."],
   ];
@@ -62,6 +67,17 @@ export async function recordRepayment(input: unknown) {
 export async function reverseRepayment(id: string) {
   if (!z.uuid().safeParse(id).success) return { ok: false as const, error: "Không tìm thấy thanh toán." };
   return rpc("reverse_repayment", { p_id: id });
+}
+export async function manageRepaymentDue(input: unknown) {
+  const parsed = z.discriminatedUnion("operation", [
+    z.object({ operation: z.literal("edit"), id: z.uuid(), revision: z.number().int().nonnegative(), title: z.string().trim().min(1).max(100),
+      dueDate: z.iso.date().refine(d => d >= "1900-01-01" && d <= "2109-12-31"), amount: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER) }),
+    z.object({ operation: z.literal("delete"), id: z.uuid(), revision: z.number().int().nonnegative() }),
+  ]).safeParse(input);
+  if (!parsed.success) return { ok: false as const, error: parsed.error.issues[0]?.message ?? "Dữ liệu khoản trả chưa hợp lệ." };
+  const p = parsed.data;
+  return rpc("manage_repayment_due", { p_id: p.id, p_revision: p.revision, p_delete: p.operation === "delete",
+    p_title: p.operation === "edit" ? p.title : null, p_date: p.operation === "edit" ? p.dueDate : null, p_amount: p.operation === "edit" ? p.amount : null });
 }
 export async function saveRepaymentBudget(input: unknown) {
   const parsed = z.object({ mode: z.enum(["month", "salary"]), month: day.refine(v => v.endsWith("-01")), income: money.nullable(), cash: money.nullable(), living: money.nullable(), reserve: money.nullable(), salaryDay: z.number().int().min(1).max(28) }).safeParse(input);

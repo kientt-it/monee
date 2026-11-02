@@ -5,6 +5,7 @@ export type RepaymentDue = {
   id: string; planId: string; title: string; kind: "installment" | "expense" | "manual";
   accountId: string | null; dueDate: string; amount: number; period: number; terms: number;
   confirmed: boolean; paid: number;
+  revision?: number;
 };
 export type RepaymentPayment = { id: string; dueId: string; amount: number; paidOn: string; method: string; transactionId: string | null; reversed: boolean };
 export function parsePeriod(month?: unknown, mode?: unknown): RepaymentPeriod {

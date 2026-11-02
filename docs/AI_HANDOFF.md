@@ -1,5 +1,7 @@
 # AI handoff
 
+Sửa/xóa từng kỳ đã bổ sung: cần apply migration `202611021700_repayment_due_management.sql` sau migration workspace. Xem `changes/2026-11-02-repayment-due-management.md`; paid/legacy-linked dues bị chặn để giữ lịch sử, xóa là soft-delete, không thay tiền.
+
 ## Update 02/11/2026 — repayment workspace
 
 Đã thêm `src/features/repayments` và migration `202611021600_repayment_workspace.sql`, **chưa apply live**. Khi bảng mới có sẵn, Tổng quan/Khoản trả dùng kỳ nghĩa vụ và phân bổ, `/app/allocations` redirect. Giữ fallback màn cũ trước migration. Xem `docs/changes/2026-11-02-repayment-workspace.md` trước tiếp tục: chưa có importer Excel/công cụ đối soát payment cũ; không tự đánh dấu lịch sử đã trả. Không xóa bảng legacy. `outputs/` là local-only đã được Git/TS/ESLint ignore. Test SQL chỉ chạy database tạm; không chạy harness trên Supabase.

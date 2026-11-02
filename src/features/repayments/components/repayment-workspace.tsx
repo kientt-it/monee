@@ -3,14 +3,14 @@
 import Link from "next/link";
 import { useEffect, useRef, useState, useTransition, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { CalendarCheck, ChevronLeft, ChevronRight, CreditCard, Plus, X } from "lucide-react";
+import { CalendarCheck, ChevronLeft, ChevronRight, CreditCard, Pencil, Plus, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { MoneyInput } from "@/components/ui/money-input";
 import { DateInput } from "@/components/ui/date-input";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils";
 import { displayDate, localToday } from "@/lib/date";
-import { createRepaymentPlan, createRepaymentSource, recordRepayment, reverseRepayment, saveRepaymentBudget } from "../actions";
+import { createRepaymentPlan, createRepaymentSource, manageRepaymentDue, recordRepayment, reverseRepayment, saveRepaymentBudget } from "../actions";
 import { dueStatus, periodWindow, plannedSurplus, remaining, schedule, shiftMonth, summarizeDues, type RepaymentDue, type RepaymentPeriod } from "../domain";
 import type { RepaymentData } from "../queries";
 
@@ -27,6 +27,7 @@ export function RepaymentWorkspace({ data, period, view = "overview", openNew = 
   const router = useRouter();
   const [editor, setEditor] = useState<"installment" | "expense" | "manual" | "budget" | null>(openNew ? "installment" : null);
   const [paying, setPaying] = useState<RepaymentDue | null>(null);
+  const [managing, setManaging] = useState<{ due: RepaymentDue; operation: "edit" | "delete" } | null>(null);
   const [source, setSource] = useState("");
   const [kind, setKind] = useState("");
   const [status, setStatus] = useState("");
@@ -48,7 +49,7 @@ export function RepaymentWorkspace({ data, period, view = "overview", openNew = 
       <div className="rounded-xl bg-[var(--surface-muted)] px-1 py-2 text-center text-xs text-[var(--muted)]"><span className="block text-lg font-semibold text-[var(--foreground)]">{d.dueDate.slice(8)}</span>{d.dueDate.slice(5, 7)}/{d.dueDate.slice(2, 4)}</div>
       <div className="min-w-0"><h3 className="break-words font-semibold">{d.title}</h3><p className="mt-1 text-xs text-[var(--muted)]">{accountName(d.accountId)} · {d.kind === "installment" ? `Kỳ ${d.period}/${d.terms}` : d.kind === "expense" ? "Chi tiêu" : "Khoản cần trả"}</p><span className={`mt-2 inline-block rounded-md px-2 py-1 text-xs ${paid ? "bg-[var(--brand-soft)] text-[var(--brand-strong)]" : "bg-[var(--surface-muted)] text-[var(--foreground)]"}`}>{dueStatus(d)}</span>
       {remaining(d) > 0 && d.dueDate < localToday() && <span className="ml-2 text-xs text-[var(--danger)]">{d.confirmed ? "Quá hạn" : "Hạn đã qua, cần xác nhận"}</span>}</div>
-      <div className="col-start-2 flex flex-wrap items-center justify-between gap-3 sm:col-start-auto sm:block sm:text-right"><p className="font-semibold tabular-nums">{formatCurrency(remaining(d))}</p>{!paid && <button type="button" onClick={() => setPaying(d)} className="min-h-11 text-sm font-semibold text-[var(--brand)]">Thanh toán</button>}</div>
+      <div className="col-start-2 flex flex-wrap items-center justify-between gap-3 sm:col-start-auto sm:block sm:text-right"><p className="font-semibold tabular-nums">{formatCurrency(remaining(d))}</p>{!paid && <button type="button" onClick={() => setPaying(d)} className="min-h-11 text-sm font-semibold text-[var(--brand)]">Thanh toán</button>}<div className="flex gap-1 sm:justify-end"><button type="button" aria-label={`Sửa kỳ ${d.period} của ${d.title}`} onClick={() => setManaging({ due: d, operation: "edit" })} className="flex min-h-11 items-center gap-1 rounded-lg px-2 text-sm text-[var(--brand)]"><Pencil size={15} /> Sửa</button><button type="button" aria-label={`Xóa kỳ ${d.period} của ${d.title}`} onClick={() => setManaging({ due: d, operation: "delete" })} className="flex min-h-11 items-center gap-1 rounded-lg px-2 text-sm text-[var(--danger)]"><Trash2 size={15} /> Xóa</button></div></div>
     </li>;
   }
   return <main className="min-w-0 px-4 pb-28 pt-6 sm:px-6 md:p-8"><div className="mx-auto max-w-[1060px]">
@@ -70,8 +71,28 @@ export function RepaymentWorkspace({ data, period, view = "overview", openNew = 
     {!editor && <div className="mt-4 flex flex-wrap gap-4"><button type="button" onClick={() => setAddingSource(true)} className="min-h-11 text-sm font-semibold text-[var(--brand)]">+ Thêm thẻ / nguồn trả sau</button><Link href="/app/transactions/new" className="min-h-11 py-3 text-sm font-semibold text-[var(--brand)]">Ghi thu / chi thực tế</Link></div>}
     {addingSource && <SourceEditor close={() => setAddingSource(false)} />}
     {paying && <PaymentEditor due={paying} data={data} close={() => setPaying(null)} />}
+    {managing && <DueEditor due={managing.due} operation={managing.operation} close={() => setManaging(null)} />}
     {undoId && <Modal title="Bỏ phân bổ thanh toán?" busy={pending} close={() => setUndoId(null)}><p className="mt-4 text-sm">Khoản cần trả sẽ mở lại. Giao dịch tiền thực vẫn được giữ; bạn có thể phân bổ lại hoặc xử lý giao dịch riêng.</p><div className="mt-6 flex justify-end gap-3"><Button variant="outline" disabled={pending} onClick={() => setUndoId(null)}>Hủy</Button><Button disabled={pending} onClick={() => startTransition(async () => { const result = await reverseRepayment(undoId); if (!result.ok) toast.error(result.error); else { toast.success("Đã bỏ phân bổ, giữ nguyên giao dịch tiền."); setUndoId(null); router.refresh(); } })}>{pending ? "Đang lưu…" : "Bỏ phân bổ"}</Button></div></Modal>}
   </div></main>;
+}
+
+function DueEditor({ due, operation, close }: { due: RepaymentDue; operation: "edit" | "delete"; close: () => void }) {
+  const router = useRouter(); const [pending, start] = useTransition();
+  const [title, setTitle] = useState(due.title); const [date, setDate] = useState(due.dueDate);
+  const [amount, setAmount] = useState<number | undefined>(due.amount); const [error, setError] = useState("");
+  const locked = due.paid > 0;
+  return <Modal title={operation === "edit" ? "Sửa kỳ trả" : "Xóa kỳ khỏi lịch?"} close={close} busy={pending}><form onSubmit={e => {
+    e.preventDefault(); start(async () => {
+      const result = await manageRepaymentDue(operation === "delete" ? { operation, id: due.id, revision: due.revision ?? 0 }
+        : { operation, id: due.id, revision: due.revision ?? 0, title, dueDate: date, amount });
+      if (!result.ok) setError(result.error); else { toast.success(operation === "edit" ? "Đã sửa kỳ trả." : "Đã xóa kỳ khỏi lịch."); close(); router.refresh(); }
+    });
+  }}><p className="mt-3 text-sm text-[var(--muted)]">{due.title} · Kỳ {due.period}/{due.terms} · Hạn {displayDate(due.dueDate)}</p>
+    {locked ? <p role="alert" className="mt-4 rounded-xl bg-[var(--surface-muted)] p-3 text-sm">Kỳ này đã có thanh toán. Bỏ phân bổ trong Lịch sử xác nhận & thanh toán trước khi sửa hoặc xóa. Giao dịch tiền vẫn được giữ.</p>
+    : operation === "edit" ? <><div className="mt-4 grid gap-4 sm:grid-cols-2"><label className="text-sm sm:col-span-2">Tên kỳ trả<input className={field} value={title} onChange={e => setTitle(e.target.value)} required maxLength={100} disabled={pending} /></label><label className="text-sm">Ngày đến hạn<DateInput className="mt-2" value={date} onChange={e => setDate(e.target.value)} required min="1900-01-01" max="2109-12-31" disabled={pending} /></label><label className="text-sm">Số tiền kỳ này<MoneyInput value={amount} onValueChange={setAmount} required disabled={pending} /></label></div><p className="mt-4 text-xs text-[var(--muted)]">Chỉ thay đổi kỳ đang chọn; các kỳ khác và số dư tài khoản giữ nguyên. Nhập 0 nếu kỳ này không phát sinh tiền.</p></>
+    : <p className="mt-4 text-sm">Xóa khoản {formatCurrency(due.amount)} khỏi lịch và tổng cần trả. Chỉ áp dụng kỳ đang chọn, các kỳ khác giữ nguyên. Dữ liệu được lưu dấu vết, không xóa giao dịch tiền.</p>}
+    {error && <p role="alert" className="mt-3 text-sm text-[var(--danger)]">{error}</p>}<div className="mt-6 flex flex-wrap justify-end gap-3"><Button type="button" variant="outline" disabled={pending} onClick={close}>Hủy</Button><Button type="submit" disabled={pending || locked || (operation === "edit" && amount === undefined)}>{pending ? "Đang lưu…" : operation === "edit" ? "Lưu thay đổi" : "Xóa kỳ này"}</Button></div>
+  </form></Modal>;
 }
 
 function SourceEditor({ close }: { close: () => void }) {
