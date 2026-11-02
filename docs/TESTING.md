@@ -1,5 +1,7 @@
 # Testing
 
+Bulk delete: `supabase/tests/bulk_delete_repayment_dues.sql` (database disposable) kiểm tra nguyên tử, phân quyền, paid guard, retry và phạm vi lựa chọn; script maintenance reset được kiểm tra ROLLBACK/COMMIT với hai user, giữ nguyên accounts/transactions.
+
 `supabase/tests/repayment_due_management.sql` bổ sung kiểm thử sửa/xóa kỳ trả và chạy lại harness workspace trên database disposable. Có kiểm tra paid guard, owner, revision, soft-delete và không đổi số dư. Không chạy trên Supabase live.
 
 ## Lịch trả theo kỳ

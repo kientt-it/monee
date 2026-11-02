@@ -19,6 +19,7 @@ begin
   if u is null then raise exception 'AUTH_REQUIRED'; end if;
   select * into d from public.repayment_dues where id=p_id and user_id=u for update;
   if d.id is null then raise exception 'DUE_NOT_FOUND'; end if;
+  -- Retrying a successful cancel is harmless. Re-editing a deleted period is not.
   if d.deleted_at is not null then
     if p_delete is true then return; end if;
     raise exception 'DUE_DELETED';
@@ -42,6 +43,8 @@ end $$;
 revoke all on function public.manage_repayment_due(uuid,integer,boolean,text,date,bigint) from public,anon,authenticated;
 grant execute on function public.manage_repayment_due(uuid,integer,boolean,text,date,bigint) to authenticated;
 
+-- Payment mutations use the same row lock as editing; canceled dues cannot
+-- receive money, including requests sent from an already open stale form.
 create or replace function public.record_repayment(p_due uuid,p_amount bigint,p_paid_on date,p_method text,p_source uuid,p_transaction uuid,p_key uuid)
 returns uuid language plpgsql security definer set search_path='' as $$
 declare u uuid:=auth.uid(); d public.repayment_dues%rowtype; plan public.repayment_plans%rowtype;
@@ -59,6 +62,7 @@ begin
     if previous.reversed_at is not null then raise exception 'PAYMENT_REVERSED'; end if;
     return previous.id;
   end if;
+  -- Lock existing transaction first: transaction mutation RPCs also start here.
   if p_method='link' then
     select * into tx from public.transactions where id=p_transaction and user_id=u and deleted_at is null for update;
     if tx.id is null or not exists(select 1 from public.accounts where id=tx.account_id and user_id=u and type in ('cash','bank','ewallet')) then raise exception 'INVALID_TRANSACTION'; end if;
@@ -95,6 +99,8 @@ begin
   return result;
 end $$;
 
+
+
 create or replace function public.reverse_repayment(p_id uuid) returns void language plpgsql security definer set search_path='' as $$
 declare d uuid;
 begin
@@ -105,6 +111,7 @@ begin
   update public.repayment_dues set revision=revision+1 where id=d;
   update public.repayment_payments set reversed_at=coalesce(reversed_at,now()) where id=p_id and user_id=auth.uid();
 end $$;
+
 
 notify pgrst,'reload schema';
 commit;

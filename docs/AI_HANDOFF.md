@@ -1,5 +1,7 @@
 # AI handoff
 
+Xóa hàng loạt cần migration `202611021800_bulk_delete_repayment_dues.sql`. Reset toàn bộ lịch trả một user nằm trong `supabase/maintenance/reset_one_users_repayments.sql`, **không phải migration**, mặc định ROLLBACK và bắt buộc thay UUID; không chạy tự động. Xem `changes/2026-11-02-bulk-delete-and-reset.md`.
+
 Sửa/xóa từng kỳ đã bổ sung: cần apply migration `202611021700_repayment_due_management.sql` sau migration workspace. Xem `changes/2026-11-02-repayment-due-management.md`; paid/legacy-linked dues bị chặn để giữ lịch sử, xóa là soft-delete, không thay tiền.
 
 ## Update 02/11/2026 — repayment workspace

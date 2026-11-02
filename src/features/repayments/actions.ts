@@ -19,6 +19,7 @@ const paymentSchema = z.object({ dueId: z.uuid(), amount: money.refine(v => v > 
 function refresh() { for (const path of ["/app", "/app/payables", "/app/allocations", "/app/accounts", "/app/transactions", "/app/reports"]) revalidatePath(path); }
 function errorMessage(message: string) {
   const errors: [string, string][] = [
+    ["INVALID_DUE_SELECTION", "Chọn từ 1 đến 200 kỳ khác nhau để xóa."],
     ["DUE_HAS_PAYMENTS", "Kỳ này đã có thanh toán. Bỏ phân bổ trước khi sửa hoặc xóa; giao dịch tiền vẫn được giữ."],
     ["DUE_CHANGED", "Khoản đã thay đổi ở phiên khác. Tải lại danh sách trước khi tiếp tục."],
     ["DUE_DELETED", "Kỳ này đã được xóa khỏi lịch."],
@@ -78,6 +79,12 @@ export async function manageRepaymentDue(input: unknown) {
   const p = parsed.data;
   return rpc("manage_repayment_due", { p_id: p.id, p_revision: p.revision, p_delete: p.operation === "delete",
     p_title: p.operation === "edit" ? p.title : null, p_date: p.operation === "edit" ? p.dueDate : null, p_amount: p.operation === "edit" ? p.amount : null });
+}
+export async function bulkDeleteRepaymentDues(input: unknown) {
+  const parsed = z.array(z.object({ id: z.uuid(), revision: z.number().int().nonnegative() })).min(1).max(200)
+    .refine(items => new Set(items.map(i => i.id)).size === items.length, "Danh sách có kỳ trùng lặp.").safeParse(input);
+  if (!parsed.success) return { ok: false as const, error: parsed.error.issues[0]?.message ?? "Danh sách chưa hợp lệ." };
+  return rpc("bulk_delete_repayment_dues", { p_items: parsed.data });
 }
 export async function saveRepaymentBudget(input: unknown) {
   const parsed = z.object({ mode: z.enum(["month", "salary"]), month: day.refine(v => v.endsWith("-01")), income: money.nullable(), cash: money.nullable(), living: money.nullable(), reserve: money.nullable(), salaryDay: z.number().int().min(1).max(28) }).safeParse(input);
