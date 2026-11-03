@@ -1,3 +1,5 @@
+> 2026-11-03: legacy soft cancellation fix requires `202611030900_allow_legacy_due_cancellation.sql`; see `docs/changes/2026-11-03-legacy-due-cancellation.md`. Regression: `supabase/tests/legacy_due_cancellation.sql` on disposable DB only.
+
 > Update 2026-11-03: reset maintenance now uses a single DO statement with `v_delete := false` by default; no temporary tables or BEGIN/ROLLBACK workflow. Export `supabase/maintenance/preview_one_users_repayments.sql` first, then set `v_delete := true` to apply. Both files must target the same user. Local PostgreSQL tests passed for validate/apply, ownership and unchanged accounts/transactions. Older ROLLBACK instructions below are superseded.
 
 # AI handoff

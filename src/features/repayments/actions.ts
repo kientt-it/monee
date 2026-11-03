@@ -31,7 +31,7 @@ function errorMessage(message: string) {
     ["PAYMENT_EXCEEDS_CARD_DEBT", "Số tiền vượt dư nợ đã đối soát của nguồn. Kiểm tra số dư thẻ trước khi trả."],
     ["REQUEST_CONFLICT", "Yêu cầu đã được dùng với nội dung khác. Đóng form rồi thử lại."],
     ["PAYMENT_DATE_MISMATCH", "Ngày trả phải khớp ngày của giao dịch liên kết."],
-    ["LEGACY_PAYMENT_UNRECONCILED", "Khoản có liên kết thanh toán cũ, cần đối soát trước khi sửa, xóa hoặc phân bổ."],
+    ["LEGACY_PAYMENT_UNRECONCILED", "Khoản có liên kết thanh toán cũ. Cần đối soát trước khi sửa hoặc phân bổ; xóa kỳ chỉ bỏ khỏi lịch, giữ nguyên lịch sử tiền."],
     ["INVALID_PAYMENT", "Kiểm tra số tiền và ngày thực trả; không chọn ngày tương lai."],
     ["PAYMENT_REVERSED", "Khoản thanh toán đã được hoàn tác. Hãy tạo yêu cầu mới."],
   ];
