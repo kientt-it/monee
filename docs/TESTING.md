@@ -1,3 +1,5 @@
+> Update 2026-11-03: reset maintenance now uses a single DO statement with `v_delete := false` by default; no temporary tables or BEGIN/ROLLBACK workflow. Export `supabase/maintenance/preview_one_users_repayments.sql` first, then set `v_delete := true` to apply. Both files must target the same user. Local PostgreSQL tests passed for validate/apply, ownership and unchanged accounts/transactions. Older ROLLBACK instructions below are superseded.
+
 # Testing
 
 Bulk delete: `supabase/tests/bulk_delete_repayment_dues.sql` (database disposable) kiểm tra nguyên tử, phân quyền, paid guard, retry và phạm vi lựa chọn; script maintenance reset được kiểm tra ROLLBACK/COMMIT với hai user, giữ nguyên accounts/transactions.
