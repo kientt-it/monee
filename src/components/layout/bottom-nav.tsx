@@ -11,7 +11,7 @@ type NavItem = "home" | "transactions" | "reports" | "payables" | "accounts";
 const moreItems = [
   ["Giao dịch", "/app/transactions"],
   ["Báo cáo", "/app/reports"],
-  ["Công cụ", "/app/hui"],
+  ["Công cụ", "/app/tools"],
   ["Mục tiêu", "/app/goals"],
   ["Thông báo", "/app/notifications"],
   ["Cá nhân", "/app/settings/profile"],
@@ -22,7 +22,7 @@ export function BottomNav({ active }: { active?: NavItem }) {
   const router = useRouter();
   const [moreOpen, setMoreOpen] = useState(false);
   const current = active ?? (pathname === "/app" ? "home" : pathname.startsWith("/app/payables") ? "payables" : pathname.startsWith("/app/accounts") ? "accounts" : pathname.startsWith("/app/transactions") ? "transactions" : pathname.startsWith("/app/reports") ? "reports" : undefined);
-  const moreActive = moreItems.some(([, path]) => pathname.startsWith(path));
+  const moreActive = pathname.startsWith("/app/hui") || moreItems.some(([, path]) => pathname.startsWith(path));
   const itemClass = (item: NavItem) => cn("flex min-h-11 flex-col items-center justify-center gap-1 text-[11px] font-medium", current === item ? "text-[var(--brand)]" : "text-[var(--muted)]");
   const prefetchOnIntent = (path: string) => ({
     onPointerEnter: () => router.prefetch(path),

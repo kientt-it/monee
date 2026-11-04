@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Calculator, HandCoins } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { MoneyInput } from "@/components/ui/money-input";
@@ -21,6 +22,7 @@ export function HuiCalculator() {
   return <main className="min-w-0 px-4 pb-[calc(env(safe-area-inset-bottom)+7rem)] pt-5 sm:px-6 md:px-10 md:pb-12 md:pt-8">
     <div className="mx-auto max-w-[900px] space-y-6">
       <header>
+        <Link href="/app/tools" className="mb-3 inline-flex min-h-11 items-center text-sm font-semibold text-[var(--brand)]">← Công cụ tài chính</Link>
         <p className="text-sm text-[var(--muted)]">Tính nhanh tiền hốt kỳ này</p>
         <h1 className="mt-1 text-2xl font-bold md:text-3xl">Tính hụi</h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">Dây hụi sống 1,8 triệu, hụi chết 2 triệu có thể bỏ mức khác nhau mỗi kỳ. Nhập mức bạn định bỏ để xem số tiền nhận nếu mức đó nhỏ nhất.</p>

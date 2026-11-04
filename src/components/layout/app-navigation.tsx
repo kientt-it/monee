@@ -11,7 +11,7 @@ const items = [
   ["Giao dịch", "/app/transactions"],
   ["Mục tiêu", "/app/goals"],
   ["Báo cáo", "/app/reports"],
-  ["Công cụ", "/app/hui"],
+  ["Công cụ", "/app/tools"],
   ["Thông báo", "/app/notifications"],
   ["Cá nhân", "/app/settings/profile"],
 ] as const;
@@ -19,7 +19,7 @@ const items = [
 export function AppNavigation() {
   const pathname = usePathname();
   const router = useRouter();
-  const isActive = (path: string) => path === "/app" ? pathname === path : pathname.startsWith(path);
+  const isActive = (path: string) => path === "/app" ? pathname === path : pathname.startsWith(path) || (path === "/app/tools" && pathname.startsWith("/app/hui"));
   const prefetchOnIntent = (path: string) => ({
     onPointerEnter: () => router.prefetch(path),
     onFocus: () => router.prefetch(path),
