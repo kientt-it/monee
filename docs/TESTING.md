@@ -1,3 +1,5 @@
+> 2026-11-04: `/app/hui` now estimates full-cycle nominal profit/loss by payout period and previous contributions. See `docs/changes/2026-11-04-hui-profit.md`. Suite: 77 tests. No SQL needed.
+
 > 2026-11-04: financial tools at `/app/tools` (currency conversion + deposit interest); no SQL required. See `docs/changes/2026-11-04-financial-tools.md`. Suite: 66 tests.
 
 > 2026-11-03: legacy soft cancellation fix requires `202611030900_allow_legacy_due_cancellation.sql`; see `docs/changes/2026-11-03-legacy-due-cancellation.md`. Regression: `supabase/tests/legacy_due_cancellation.sql` on disposable DB only.

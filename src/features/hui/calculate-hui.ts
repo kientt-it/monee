@@ -49,3 +49,17 @@ export function calculateHui(input: HuiInput): HuiResult | null {
     discountPerLivingShare: faceValue - bid,
   };
 }
+
+export function calculateHuiProfit(input: HuiInput & { pastContributions: number }) {
+  const result = calculateHui(input);
+  const { pastContributions } = input;
+  if (!result || !Number.isSafeInteger(pastContributions) || pastContributions < 0 || pastContributions > 1_000_000_000_000_000
+    || (input.paidOutShares === 0 && pastContributions !== 0)) return null;
+  // cashReceived already excludes the winner's own contribution at payout.
+  // Subtracting it again would double-count that simultaneous cash flow.
+  const totalContributions = pastContributions + result.remainingContributions;
+  const profit = result.cashReceived - totalContributions;
+  if (!Number.isSafeInteger(totalContributions) || !Number.isSafeInteger(profit)) return null;
+  return { ...result, pastContributions, totalContributions, profit,
+    profitPercent: totalContributions > 0 ? profit / totalContributions * 100 : null };
+}
