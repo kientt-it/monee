@@ -26,7 +26,7 @@ export function AppNavigation() {
     onTouchStart: () => router.prefetch(path),
   });
 
-  return <aside className="hidden min-h-screen border-r border-[var(--border)] bg-[var(--surface)] p-7 md:block">
+  return <aside className="hidden border-r border-[var(--border)] bg-[var(--surface)] p-7 md:sticky md:top-0 md:block md:h-dvh md:self-start md:overflow-y-auto md:overscroll-contain">
     <div className="mb-12 flex items-center gap-3"><div className="flex h-10 w-10 items-center justify-center rounded-[14px] bg-[var(--brand)] text-white"><PiggyBank size={21} /></div><span className="text-xl font-bold tracking-tight">monee</span></div>
     <p className="mb-3 px-3 text-xs font-semibold uppercase tracking-[.16em] text-[var(--muted)]">Không gian của bạn</p>
     <nav className="space-y-1" aria-label="Điều hướng desktop">
