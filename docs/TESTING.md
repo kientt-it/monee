@@ -1,3 +1,5 @@
+> 2026-11-04: save latest hui calculation per user requires `202611041100_hui_saved_calculation.sql`; see `docs/changes/2026-11-04-hui-save.md`. Suite 83 tests; SQL RLS harness `supabase/tests/hui_saved_calculation.sql` disposable DB only.
+
 > 2026-11-04: `/app/hui` now estimates full-cycle nominal profit/loss by payout period and previous contributions. See `docs/changes/2026-11-04-hui-profit.md`. Suite: 77 tests. No SQL needed.
 
 > 2026-11-04: financial tools at `/app/tools` (currency conversion + deposit interest); no SQL required. See `docs/changes/2026-11-04-financial-tools.md`. Suite: 66 tests.

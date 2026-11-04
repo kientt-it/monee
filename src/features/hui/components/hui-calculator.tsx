@@ -1,39 +1,66 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
-import { Calculator, HandCoins } from "lucide-react";
+import { Calculator, HandCoins, Save } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { MoneyInput } from "@/components/ui/money-input";
 import { formatCurrency } from "@/lib/utils";
 import { calculateHui, calculateHuiProfit } from "../calculate-hui";
+import { saveHuiCalculation } from "../actions";
+import { huiConfigSchema, type SavedHuiCalculation } from "../saved-calculation";
 
 const countInputClass = "mt-2 min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-base tabular-nums";
 
-export function HuiCalculator() {
-  const [shares, setShares] = useState("34");
-  const [payoutPeriod, setPayoutPeriod] = useState("17");
-  const [historyMode, setHistoryMode] = useState<"average" | "total">("average");
-  const [averageContribution, setAverageContribution] = useState<number | null>(1_800_000);
-  const [pastTotal, setPastTotal] = useState<number | null>(null);
+export function HuiCalculator({ initialSaved = null, savingAvailable = true, initialNotice = null }: { initialSaved?: SavedHuiCalculation | null; savingAvailable?: boolean; initialNotice?: string | null }) {
+  const saved = initialSaved?.config;
+  const [shares, setShares] = useState(String(saved?.shares ?? 34));
+  const [payoutPeriod, setPayoutPeriod] = useState(String(saved?.payoutPeriod ?? 17));
+  const [historyMode, setHistoryMode] = useState<"average" | "total">(saved?.historyMode ?? "average");
+  const [averageContribution, setAverageContribution] = useState<number | null>(saved ? saved.averageContribution : 1_800_000);
+  const [pastTotal, setPastTotal] = useState<number | null>(saved?.pastTotal ?? null);
   const paidOutShares = payoutPeriod.trim() ? Number(payoutPeriod) - 1 : NaN;
-  const [faceValue, setFaceValue] = useState<number | null>(2_000_000);
-  const [startingContribution, setStartingContribution] = useState<number | null>(1_800_000);
-  const [bid, setBid] = useState<number | null>(1_700_000);
-  const [organizerFee, setOrganizerFee] = useState<number | null>(0);
+  const [faceValue, setFaceValue] = useState<number | null>(saved?.faceValue ?? 2_000_000);
+  const [startingContribution, setStartingContribution] = useState<number | null>(saved?.startingContribution ?? 1_800_000);
+  const [bid, setBid] = useState<number | null>(saved?.bid ?? 1_700_000);
+  const [organizerFee, setOrganizerFee] = useState<number | null>(saved?.organizerFee ?? 0);
+  const [savedAt, setSavedAt] = useState(initialSaved?.savedAt ?? null);
+  const [savedKey, setSavedKey] = useState(saved ? JSON.stringify(huiConfigSchema.parse(saved)) : null);
+  const [saveError, setSaveError] = useState("");
+  const [pending, startSaving] = useTransition();
   const huiInput = { shares: shares.trim() ? Number(shares) : NaN, paidOutShares, faceValue: faceValue ?? 0, startingContribution: startingContribution ?? 0, bid: bid ?? 0, organizerFee: organizerFee ?? 0 };
   const result = calculateHui(huiInput);
   const pastContributions = paidOutShares === 0 ? 0 : historyMode === "average" ? (averageContribution === null ? NaN : averageContribution * paidOutShares) : (pastTotal ?? NaN);
   const profitResult = calculateHuiProfit({ ...huiInput, pastContributions });
   const isEstimate = historyMode === "average" && paidOutShares > 0;
+  const config = huiConfigSchema.safeParse({ version: 1, shares: Number(shares), payoutPeriod: Number(payoutPeriod), faceValue, startingContribution, bid, organizerFee, historyMode, averageContribution, pastTotal });
+  const currentKey = config.success ? JSON.stringify(config.data) : null;
+  const dirty = currentKey !== savedKey;
+  function saveCalculation() {
+    if (!config.success) return;
+    const submitted = config.data;
+    setSaveError("");
+    startSaving(async () => {
+      try {
+        const response = await saveHuiCalculation(submitted);
+        if (!response.ok) { setSaveError(response.error); return; }
+        setSavedAt(response.savedAt);
+        setSavedKey(JSON.stringify(submitted));
+      } catch { setSaveError("Mất kết nối, chưa lưu được bản tính. Vui lòng thử lại."); }
+    });
+  }
 
   return <main className="min-w-0 px-4 pb-[calc(env(safe-area-inset-bottom)+7rem)] pt-5 sm:px-6 md:px-10 md:pb-12 md:pt-8">
     <div className="mx-auto max-w-[900px] space-y-6">
       <header>
         <Link href="/app/tools" className="mb-3 inline-flex min-h-11 items-center text-sm font-semibold text-[var(--brand)]">← Công cụ tài chính</Link>
         <p className="text-sm text-[var(--muted)]">Tiền hốt và lãi/lỗ cả dây</p>
-        <h1 className="mt-1 text-2xl font-bold md:text-3xl">Tính hụi</h1>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">Chọn kỳ hốt để xem tiền thực nhận và lãi/lỗ khi kết thúc dây. Giả định bạn tham gia một chân, mỗi tháng hốt một chân. Các số điền sẵn là ví dụ để bạn thay theo dây thực tế.</p>
+        <div className="mt-1 flex flex-wrap items-center justify-between gap-3"><h1 className="text-2xl font-bold md:text-3xl">Tính hụi</h1><Button type="button" onClick={saveCalculation} disabled={pending || !savingAvailable || !config.success || !dirty}><Save size={18} aria-hidden="true" />{pending ? "Đang lưu…" : "Lưu bản tính"}</Button></div>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">Chọn kỳ hốt để xem tiền thực nhận và lãi/lỗ khi kết thúc dây. Giả định bạn tham gia một chân, mỗi tháng hốt một chân. {savedAt ? "Bạn có thể điều chỉnh các thông số rồi lưu lại." : "Các số điền sẵn là ví dụ để bạn thay theo dây thực tế."}</p>
+        <p role="status" className="mt-3 text-xs leading-5 text-[var(--muted)]">{savedAt ? `${dirty ? "Có thay đổi chưa lưu. " : "Đã lưu. "}Lần lưu gần nhất: ${new Date(savedAt).toLocaleString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" })}.` : "Lưu bản tính gần nhất theo tài khoản để mở lại trên các thiết bị."}</p>
+        {initialNotice && <p className="mt-3 text-sm text-[var(--warning)]">{initialNotice}</p>}
+        {saveError && <p role="alert" className="mt-3 text-sm text-[var(--danger)]">{saveError}</p>}
       </header>
 
       <Card className="p-5 sm:p-6">
