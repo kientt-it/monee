@@ -3,14 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getSupabaseAuthContext } from "@/lib/supabase/auth-context";
+import { planSchema } from "./plan-schema";
 
 const money = z.number().int().min(0).max(1_000_000_000_000);
 const day = z.iso.date().refine(s => s >= "1900-01-01" && s <= "2099-12-31");
-const planSchema = z.object({ title: z.string().trim().min(1).max(100), accountId: z.uuid().nullable(), kind: z.enum(["installment", "expense", "manual"]), firstDue: day,
-  terms: z.number().int().min(1).max(120), amount: money.refine(v => v > 0), finalAmount: money.nullable(), key: z.uuid() }).superRefine((v, ctx) => {
-    if (v.kind !== "manual" && !v.accountId) ctx.addIssue({ code: "custom", message: "Chọn nguồn thẻ hoặc trả sau." });
-    if (v.kind !== "installment" && v.terms !== 1) ctx.addIssue({ code: "custom", message: "Khoản trả một lần chỉ có một kỳ." });
-  });
 const paymentSchema = z.object({ dueId: z.uuid(), amount: money.refine(v => v > 0), paidOn: day, method: z.enum(["history", "new", "link"]), sourceId: z.uuid().nullable(), transactionId: z.uuid().nullable(), key: z.uuid() })
   .superRefine((v, ctx) => {
     if (v.method === "new" && !v.sourceId) ctx.addIssue({ code: "custom", message: "Chọn tài khoản nguồn." });
@@ -19,6 +15,9 @@ const paymentSchema = z.object({ dueId: z.uuid(), amount: money.refine(v => v > 
 function refresh() { for (const path of ["/app", "/app/payables", "/app/allocations", "/app/accounts", "/app/transactions", "/app/reports"]) revalidatePath(path); }
 function errorMessage(message: string) {
   const errors: [string, string][] = [
+    ["INSUFFICIENT_CARD_CREDIT", "Hạn mức khả dụng của thẻ không đủ cho khoản mới. Kiểm tra lại số gốc và số dư thẻ."],
+    ["INVALID_PURCHASE_SOURCE", "Chỉ thẻ tín dụng đang hoạt động mới được ghi nhận khoản sử dụng hạn mức."],
+    ["INVALID_PURCHASE", "Kiểm tra số tiền sử dụng hạn mức và ngày phát sinh; không chọn ngày tương lai."],
     ["INVALID_DUE_SELECTION", "Chọn từ 1 đến 200 kỳ khác nhau để xóa."],
     ["DUE_HAS_PAYMENTS", "Kỳ này đã có thanh toán. Bỏ phân bổ trước khi sửa hoặc xóa; giao dịch tiền vẫn được giữ."],
     ["DUE_CHANGED", "Khoản đã thay đổi ở phiên khác. Tải lại danh sách trước khi tiếp tục."],
@@ -41,6 +40,7 @@ async function rpc(name: string, args: Record<string, unknown>) {
   const { supabase, user } = await getSupabaseAuthContext();
   if (!supabase || !user) return { ok: false as const, error: "Bạn cần đăng nhập để tiếp tục." };
   const { error } = await supabase.rpc(name, args);
+  if (error?.code === "PGRST202" && name === "create_repayment_plan_with_purchase") return { ok: false as const, error: "Chưa thể ghi nhận khoản mới vào thẻ. Vui lòng thử lại sau." };
   if (error) return { ok: false as const, error: errorMessage(error.message) };
   refresh(); return { ok: true as const };
 }
@@ -48,7 +48,7 @@ export async function createRepaymentPlan(input: unknown) {
   const parsed = planSchema.safeParse(input);
   if (!parsed.success) return { ok: false as const, error: parsed.error.issues[0]?.message ?? "Thông tin chưa hợp lệ." };
   const { key, ...value } = parsed.data;
-  return rpc("create_repayment_plan", { p_input: value, p_key: key });
+  return rpc(value.recordPurchase ? "create_repayment_plan_with_purchase" : "create_repayment_plan", { p_input: value, p_key: key });
 }
 export async function createRepaymentSource(input: unknown) {
   const parsed = z.object({ name: z.string().trim().min(1).max(80), kind: z.enum(["credit_card", "pay_later"]), limit: money.nullable(), debt: money, key: z.uuid() }).superRefine((p, ctx) => {
